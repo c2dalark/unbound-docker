@@ -269,7 +269,7 @@ records and the main unbound configuration file.
 
 ## Recursive config
 
-The default config forwards forwards DNS queries to another DNS server over TLS. If you would rather this work as a recursive DNS server, you must [use a customized Unbound configuration](https://github.com/c2dalark/unbound-docker#use-a-customized-unbound-configuration). An [example unbound.conf](https://github.com/c2dalark/unbound-docker/blob/master/unbound.conf) file to configure unbound as a recursive server is available as a guide.
+The default config forwards forwards DNS queries to another DNS server over TLS. If you would rather this work as a recursive DNS server, you must [use a customized Unbound configuration](https://github.com/c2dalark/unbound-docker#use-a-customized-unbound-configuration). An [example unbound.conf](https://github.com/c2dalark/unbound-docker/blob/main/unbound.conf) file to configure unbound as a recursive server is available as a guide.
 
 ## Performance
 
@@ -310,7 +310,7 @@ While annoying, the container works despite the error. Search this issues in thi
 
 ## Documentation
 
-Documentation for this image is stored right here in the [`README.md`](https://github.com/c2dalark/unbound-docker/blob/master/README.md).
+Documentation for this image is stored right here in the [`README.md`](https://github.com/c2dalark/unbound-docker/blob/main/README.md).
 
 Documentation for Unbound is available on the [project's website](https://unbound.net/).
 
@@ -326,7 +326,7 @@ imagine the upstream projects would be equally pleased to receive your
 contributions.
 
 Please familiarize yourself with the [repository's `README.md`
-file](https://github.com/c2dalark/unbound-docker/blob/master/README.md)
+file](https://github.com/c2dalark/unbound-docker/blob/main/README.md)
 before attempting a pull request.
 
 Before you start to code, I recommend discussing your plans through a [GitHub
@@ -351,7 +351,7 @@ all possible.
 
 Unless otherwise specified, all code is released under the MIT License (MIT).
 See the [repository's `LICENSE`
-file](https://github.com/c2dalark/unbound-docker/blob/master/LICENSE) for
+file](https://github.com/c2dalark/unbound-docker/blob/main/LICENSE) for
 details.
 
 ### Licenses for other components
