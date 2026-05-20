@@ -137,7 +137,7 @@ RUN chmod +x /unbound.sh
 
 WORKDIR /opt/unbound/
 
-ENV PATH /opt/unbound/sbin:"$PATH"
+ENV PATH=/opt/unbound/sbin:"$PATH"
 
 EXPOSE 53/tcp
 EXPOSE 53/udp
