@@ -1,5 +1,5 @@
 FROM debian:bookworm as openssl
-LABEL maintainer="Matthew Vance"
+LABEL maintainer="Chris Clark"
 
 ENV VERSION_OPENSSL=openssl-3.3.2 \
     SHA256_OPENSSL=2e8a40b01979afe8be0bbfb3de5dc1c6709fedb46d6c89c10da114ab5fc3d281 \
@@ -56,7 +56,7 @@ RUN set -e -x && \
         /var/lib/apt/lists/*
 
 FROM debian:bookworm as unbound
-LABEL maintainer="Matthew Vance"
+LABEL maintainer="Chris Clark"
 
 ENV NAME=unbound \
     UNBOUND_VERSION=1.21.1 \
@@ -110,7 +110,7 @@ RUN build_deps="curl gcc libc-dev libevent-dev libexpat1-dev libnghttp2-dev make
 
 
 FROM debian:bookworm
-LABEL maintainer="Matthew Vance"
+LABEL maintainer="Chris Clark"
 
 ENV NAME=unbound \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
@@ -148,10 +148,10 @@ WORKDIR /opt/unbound/
 ENV PATH /opt/unbound/sbin:"$PATH"
 
 LABEL org.opencontainers.image.version=${UNBOUND_VERSION} \
-      org.opencontainers.image.title="mvance/unbound" \
+      org.opencontainers.image.title="c2dalark/unbound" \
       org.opencontainers.image.description="a validating, recursive, and caching DNS resolver" \
       org.opencontainers.image.url="https://github.com/c2dalark/unbound-docker" \
-      org.opencontainers.image.vendor="Matthew Vance" \
+      org.opencontainers.image.vendor="Chris Clark" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/c2dalark/unbound-docker"
 
