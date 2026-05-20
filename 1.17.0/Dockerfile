@@ -135,10 +135,10 @@ ENV PATH /opt/unbound/sbin:"$PATH"
 LABEL org.opencontainers.image.version=${UNBOUND_VERSION} \
       org.opencontainers.image.title="mvance/unbound" \
       org.opencontainers.image.description="a validating, recursive, and caching DNS resolver" \
-      org.opencontainers.image.url="https://github.com/MatthewVance/unbound-docker" \
+      org.opencontainers.image.url="https://github.com/c2dalark/unbound-docker" \
       org.opencontainers.image.vendor="Matthew Vance" \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.source="https://github.com/MatthewVance/unbound-docker"
+      org.opencontainers.image.source="https://github.com/c2dalark/unbound-docker"
 
 EXPOSE 53/tcp
 EXPOSE 53/udp
