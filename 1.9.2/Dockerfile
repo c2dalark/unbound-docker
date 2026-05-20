@@ -1,5 +1,5 @@
 FROM debian:buster as openssl
-LABEL maintainer="Matthew Vance"
+LABEL maintainer="Chris Clark"
 
 ENV VERSION_OPENSSL=openssl-1.1.1d \
     SHA256_OPENSSL=1e3a91bc1f9dfce01af26026f856e064eab4c8ee0a8f457b5ae30b40b8b711f2 \
@@ -34,7 +34,7 @@ RUN set -e -x && \
         /var/lib/apt/lists/*
 
 FROM debian:buster as unbound
-LABEL maintainer="Matthew Vance"
+LABEL maintainer="Chris Clark"
 
 ENV NAME=unbound \
     UNBOUND_VERSION=1.9.2 \
@@ -81,7 +81,7 @@ RUN build_deps="curl gcc libc-dev libevent-dev libexpat1-dev make" && \
 
 
 FROM debian:buster
-LABEL maintainer="Matthew Vance"
+LABEL maintainer="Chris Clark"
 
 ENV NAME=unbound \
     VERSION=1.2 \
