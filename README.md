@@ -1,6 +1,7 @@
 # Unbound DNS Server Docker Image
 
 ## Supported tags and respective `Dockerfile` links
+- [`1.25.1` (*1.25.1/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/1.25.1/1.25.1)
 - [`1.22.0`, `latest` (*1.22.0/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.22.0)
 - [`1.21.1`, (*1.21.1/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.21.1)
 - [`1.21.0`, (*1.21.0/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.21.0)
