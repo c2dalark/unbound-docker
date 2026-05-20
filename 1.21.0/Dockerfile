@@ -55,7 +55,7 @@ RUN set -e -x && \
         /var/tmp/* \
         /var/lib/apt/lists/*
 
-FROM debian:bookworm as unbound
+FROM debian:bookworm AS unbound
 LABEL maintainer="Chris Clark"
 
 ENV NAME=unbound \

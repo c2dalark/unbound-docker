@@ -40,7 +40,7 @@ RUN set -e -x && \
         /var/tmp/* \
         /var/lib/apt/lists/*
 
-FROM debian:bullseye as unbound
+FROM debian:bullseye AS unbound
 LABEL maintainer="Chris Clark"
 
 ENV NAME=unbound \

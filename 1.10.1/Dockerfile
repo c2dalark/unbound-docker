@@ -41,7 +41,7 @@ RUN set -e -x && \
         /var/tmp/* \
         /var/lib/apt/lists/*
 
-FROM debian:buster as unbound
+FROM debian:buster AS unbound
 LABEL maintainer="Chris Clark"
 
 ENV NAME=unbound \

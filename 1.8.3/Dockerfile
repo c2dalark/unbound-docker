@@ -33,7 +33,7 @@ RUN set -e -x && \
         /var/tmp/* \
         /var/lib/apt/lists/*
 
-FROM debian:stretch as unbound
+FROM debian:stretch AS unbound
 LABEL maintainer="Chris Clark"
 
 ENV NAME=unbound \
