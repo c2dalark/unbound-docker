@@ -1,4 +1,4 @@
-FROM debian:buster as openssl
+FROM debian:buster AS openssl
 LABEL maintainer="Chris Clark"
 
 ENV VERSION_OPENSSL=openssl-1.1.1c \

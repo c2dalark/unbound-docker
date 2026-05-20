@@ -1,4 +1,4 @@
-FROM debian:bullseye as openssl
+FROM debian:bullseye AS openssl
 LABEL maintainer="Chris Clark"
 
 ENV VERSION_OPENSSL=openssl-3.1.3 \

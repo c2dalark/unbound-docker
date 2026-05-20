@@ -1,4 +1,4 @@
-FROM debian:bookworm as openssl
+FROM debian:bookworm AS openssl
 LABEL maintainer="Chris Clark"
 
 ENV VERSION_OPENSSL=openssl-3.3.0 \
