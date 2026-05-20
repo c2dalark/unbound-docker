@@ -23,6 +23,7 @@ ENV VERSION_OPENSSL=openssl-3.5.6 \
 
 WORKDIR /tmp/src
 
+RUN set -e -x && apt-get update -y && apt-get upgrade -y
 RUN set -e -x && \
     build_deps="build-essential ca-certificates curl dirmngr gnupg libidn2-0-dev libssl-dev" && \
     DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
@@ -67,6 +68,7 @@ WORKDIR /tmp/src
 
 COPY --from=openssl /opt/openssl /opt/openssl
 
+RUN set -x && apt-get update -y && apt-get upgrade -y
 RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexpat1-dev libnghttp2-dev make" && \
     set -x && \
     DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
@@ -120,6 +122,7 @@ WORKDIR /tmp/src
 
 COPY --from=unbound /opt /opt
 
+RUN set -x && apt-get update -y && apt-get upgrade -y
 RUN set -x && \
     DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
       bsdmainutils \
