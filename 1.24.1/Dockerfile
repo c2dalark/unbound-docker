@@ -59,9 +59,9 @@ FROM debian:bookworm AS unbound
 LABEL maintainer="Chris Clark"
 
 ENV NAME=unbound \
-    UNBOUND_VERSION=1.22.0 \
-    UNBOUND_SHA256=c5dd1bdef5d5685b2cedb749158dd152c52d44f65529a34ac15cd88d4b1b3d43 \
-    UNBOUND_DOWNLOAD_URL=https://nlnetlabs.nl/downloads/unbound/unbound-1.22.0.tar.gz
+    UNBOUND_VERSION=1.24.1 \
+    UNBOUND_SHA256=7f2b1633e239409619ae0527f67878b0f33ae0ec0ee5a3a51c042c359ba1eeab \
+    UNBOUND_DOWNLOAD_URL=https://nlnetlabs.nl/downloads/unbound/unbound-1.24.1.tar.gz
 
 WORKDIR /tmp/src
 
