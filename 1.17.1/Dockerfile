@@ -1,4 +1,4 @@
-FROM debian:bullseye as openssl
+FROM debian:bullseye AS openssl
 LABEL maintainer="Chris Clark"
 
 ENV VERSION_OPENSSL=openssl-3.1.3 \
@@ -49,7 +49,7 @@ RUN set -e -x && \
         /var/tmp/* \
         /var/lib/apt/lists/*
 
-FROM debian:bullseye as unbound
+FROM debian:bullseye AS unbound
 LABEL maintainer="Chris Clark"
 
 ENV NAME=unbound \
@@ -139,7 +139,7 @@ RUN chmod +x /unbound.sh
 
 WORKDIR /opt/unbound/
 
-ENV PATH /opt/unbound/sbin:"$PATH"
+ENV PATH=/opt/unbound/sbin:"$PATH"
 
 LABEL org.opencontainers.image.version=${UNBOUND_VERSION} \
       org.opencontainers.image.title="c2dalark/unbound" \

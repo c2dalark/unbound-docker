@@ -1,4 +1,4 @@
-FROM debian:buster as openssl
+FROM debian:buster AS openssl
 LABEL maintainer="Chris Clark"
 
 ENV VERSION_OPENSSL=openssl-1.1.1d \
@@ -33,7 +33,7 @@ RUN set -e -x && \
         /var/tmp/* \
         /var/lib/apt/lists/*
 
-FROM debian:buster as unbound
+FROM debian:buster AS unbound
 LABEL maintainer="Chris Clark"
 
 ENV NAME=unbound \
@@ -123,7 +123,7 @@ RUN chmod +x /unbound.sh
 
 WORKDIR /opt/unbound/
 
-ENV PATH /opt/unbound/sbin:"$PATH"
+ENV PATH=/opt/unbound/sbin:"$PATH"
 
 EXPOSE 53/tcp
 EXPOSE 53/udp
