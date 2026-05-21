@@ -1,7 +1,9 @@
 FROM debian:trixie AS openssl
+RUN apt-get update && apt-get upgrade -y
 LABEL maintainer="Chris Clark"
 
-ENV VERSION_OPENSSL=openssl-3.5.6 \
+ENV DEBIAN_FRONTEND=noninteractive \
+    VERSION_OPENSSL=openssl-3.5.6 \
     SHA256_OPENSSL=deae7c80cba99c4b4f940ecadb3c3338b13cb77418409238e57d7f31f2a3b736 \
     SOURCE_OPENSSL=https://www.openssl.org/source/ \
     # OpenSSL OMC
@@ -23,10 +25,9 @@ ENV VERSION_OPENSSL=openssl-3.5.6 \
 
 WORKDIR /tmp/src
 
-RUN set -e -x && apt-get update -y && apt-get upgrade -y
 RUN set -e -x && \
     build_deps="build-essential ca-certificates curl dirmngr gnupg libidn2-0-dev libssl-dev" && \
-    DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update && apt-get install -y --no-install-recommends \
       $build_deps && \
     curl -L $SOURCE_OPENSSL$VERSION_OPENSSL.tar.gz -o openssl.tar.gz && \
     echo "${SHA256_OPENSSL} ./openssl.tar.gz" | sha256sum -c - && \
@@ -57,9 +58,11 @@ RUN set -e -x && \
         /var/lib/apt/lists/*
 
 FROM debian:trixie AS unbound
+RUN apt-get update && apt-get upgrade -y
 LABEL maintainer="Chris Clark"
 
-ENV NAME=unbound \
+ENV DEBIAN_FRONTEND=noninteractive \
+    NAME=unbound \
     UNBOUND_VERSION=1.25.1 \
     UNBOUND_SHA256=0fe8b6277b0959cfd17562debac0aa5f71e0b02dc4ffa9c60271c583edab586f \
     UNBOUND_DOWNLOAD_URL=https://nlnetlabs.nl/downloads/unbound/unbound-1.25.1.tar.gz
@@ -68,10 +71,9 @@ WORKDIR /tmp/src
 
 COPY --from=openssl /opt/openssl /opt/openssl
 
-RUN set -x && apt-get update -y && apt-get upgrade -y
 RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexpat1-dev libnghttp2-dev make" && \
     set -x && \
-    DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update && apt-get install -y --no-install-recommends \
       $build_deps \
       bsdmainutils \
       ca-certificates \
@@ -84,7 +86,7 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
     echo "${UNBOUND_SHA256} *unbound.tar.gz" | sha256sum -c - && \
     tar xzf unbound.tar.gz && \
     rm -f unbound.tar.gz && \
-    cd unbound-1.22.0 && \
+    cd unbound-1.25.1 && \
     groupadd _unbound && \
     useradd -g _unbound -s /dev/null -d /etc _unbound && \
     ./configure \
@@ -112,9 +114,11 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
 
 
 FROM debian:trixie
+RUN apt-get update && apt-get upgrade -y
 LABEL maintainer="Chris Clark"
 
-ENV NAME=unbound \
+ENV DEBIAN_FRONTEND=noninteractive \
+    NAME=unbound \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
 
@@ -122,9 +126,8 @@ WORKDIR /tmp/src
 
 COPY --from=unbound /opt /opt
 
-RUN set -x && apt-get update -y && apt-get upgrade -y
 RUN set -x && \
-    DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update && apt-get install -y --no-install-recommends \
       bsdmainutils \
       ca-certificates \
       ldnsutils \
