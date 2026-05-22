@@ -114,7 +114,7 @@ server:
     # If you want to log to a file, use:
     # logfile: /opt/unbound/etc/unbound/unbound.log
     # Set log location (using /dev/null further limits logging)
-    logfile: /dev/null
+    logfile: ""
 
     # Set logging level
     # Level 0: No verbosity, only errors.
@@ -123,7 +123,7 @@ server:
     # Level 3: Gives query level information, output per query.
     # Level 4:  Gives algorithm level information.
     # Level 5: Logs client identification for cache misses.
-    verbosity: 0
+    verbosity: 1
 
     ###########################################################################
     # PRIVACY SETTINGS
@@ -360,9 +360,9 @@ server:
 
     # UDP queries that have waited in the socket buffer for a long time can be
     # dropped. The time is set in seconds, 3 could be a good value to ignore old
-    # queries that likely the client does not need a reply for any more. This 
-    # could happen if the host has not been able to service the queries for a 
-    # while, i.e. Unbound is not running, and then is enabled again. It uses 
+    # queries that likely the client does not need a reply for any more. This
+    # could happen if the host has not been able to service the queries for a
+    # while, i.e. Unbound is not running, and then is enabled again. It uses
     # timestamp socket options.
     sock-queue-timeout: 3
 
@@ -370,6 +370,10 @@ server:
     # try to set the SO_REUSEPORT socket option on each socket. May distribute
     # incoming queries to threads more evenly.
     so-reuseport: yes
+
+    # buffer size for UDP port 53 outgoing (SO_SNDBUF socket option).
+    # 0 is system default. Set larger to handle spikes on very busy servers.
+    so-sndbuf: 0
 
     ###########################################################################
     # LOCAL ZONE
@@ -392,7 +396,7 @@ EOT
 fi
 
 mkdir -p /opt/unbound/etc/unbound/dev && \
-cp -a /dev/random /dev/urandom /dev/null /opt/unbound/etc/unbound/dev/
+cp -a /dev/random /dev/urandom /dev/null /dev/stderr /dev/stdout /opt/unbound/etc/unbound/dev/
 
 mkdir -p -m 700 /opt/unbound/etc/unbound/var && \
 chown _unbound:_unbound /opt/unbound/etc/unbound/var && \
