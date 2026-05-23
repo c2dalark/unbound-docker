@@ -1,6 +1,12 @@
-FROM debian:trixie AS openssl
-RUN apt-get update && apt-get upgrade -y
+FROM debian:trixie AS base
+RUN apt-get update && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 LABEL maintainer="Chris Clark"
+WORKDIR /tmp/src
+
+
+FROM base AS openssl
 
 ENV DEBIAN_FRONTEND=noninteractive \
     VERSION_OPENSSL=openssl-3.5.6 \
@@ -22,8 +28,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
     OPGP_OPENSSL_7=E5E52560DD91C556DDBDA5D02064C53641C25E5D \
     # OpenSSL
     OPGP_OPENSSL_8=BA5473A2B0587B07FB27CF2D216094DFD0CB81EF
-
-WORKDIR /tmp/src
 
 RUN set -e -x && \
     build_deps="build-essential ca-certificates curl dirmngr gnupg libidn2-0-dev libssl-dev" && \
@@ -55,19 +59,16 @@ RUN set -e -x && \
     rm -rf \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/*
+        /var/lib/apt/lists/* && \
+    apt-get clean
 
-FROM debian:trixie AS unbound
-RUN apt-get update && apt-get upgrade -y
-LABEL maintainer="Chris Clark"
+FROM base AS unbound_build
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
     UNBOUND_VERSION=1.22.0 \
     UNBOUND_SHA256=c5dd1bdef5d5685b2cedb749158dd152c52d44f65529a34ac15cd88d4b1b3d43 \
     UNBOUND_DOWNLOAD_URL=https://nlnetlabs.nl/downloads/unbound/unbound-1.22.0.tar.gz
-
-WORKDIR /tmp/src
 
 COPY --from=openssl /opt/openssl /opt/openssl
 
@@ -109,19 +110,18 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
         /opt/unbound/share/man \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/*
+        /var/lib/apt/lists/* && \
+    apt-get clean
 
 
-FROM debian:trixie
-RUN apt-get update && apt-get upgrade -y
-LABEL maintainer="Chris Clark"
+FROM base as unbound
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
+    UNBOUND_VERSION=1.22.0 \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
 
-WORKDIR /tmp/src
 
 COPY --from=unbound /opt /opt
 
@@ -136,13 +136,13 @@ RUN set -x && \
       libprotobuf-c1 && \
     groupadd _unbound && \
     useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
-    apt-get purge -y --auto-remove \
-      $build_deps && \
+    apt-get purge -y --auto-remove && \
     rm -rf \
         /opt/unbound/share/man \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/*
+        /var/lib/apt/lists/* && \
+    apt-get clean
 
 COPY data/ /
 
