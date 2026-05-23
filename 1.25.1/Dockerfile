@@ -1,6 +1,11 @@
-FROM debian:trixie AS openssl
-RUN apt-get update && apt-get upgrade -y
+FROM debian:trixie AS base
+RUN apt-get update && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 LABEL maintainer="Chris Clark"
+WORKDIR /tmp/src
+
+FROM base AS openssl
 
 ENV DEBIAN_FRONTEND=noninteractive \
     VERSION_OPENSSL=openssl-3.5.6 \
@@ -57,17 +62,13 @@ RUN set -e -x && \
         /var/tmp/* \
         /var/lib/apt/lists/*
 
-FROM debian:trixie AS unbound
-RUN apt-get update && apt-get upgrade -y
-LABEL maintainer="Chris Clark"
+FROM base AS unbound
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
     UNBOUND_VERSION=1.25.1 \
     UNBOUND_SHA256=0fe8b6277b0959cfd17562debac0aa5f71e0b02dc4ffa9c60271c583edab586f \
     UNBOUND_DOWNLOAD_URL=https://nlnetlabs.nl/downloads/unbound/unbound-1.25.1.tar.gz
-
-WORKDIR /tmp/src
 
 COPY --from=openssl /opt/openssl /opt/openssl
 
@@ -113,16 +114,13 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
         /var/lib/apt/lists/*
 
 
-FROM debian:trixie
-RUN apt-get update && apt-get upgrade -y
-LABEL maintainer="Chris Clark"
+FROM base AS app
 
 ENV DEBIAN_FRONTEND=noninteractive \
+    UNBOUND_VERSION=1.25.1 \
     NAME=unbound \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
-
-WORKDIR /tmp/src
 
 COPY --from=unbound /opt /opt
 
@@ -137,8 +135,7 @@ RUN set -x && \
       libprotobuf-c1 && \
     groupadd _unbound && \
     useradd -g _unbound -s /dev/null -d /etc _unbound && \
-    apt-get purge -y --auto-remove \
-      $build_deps && \
+    apt-get purge -y --auto-remove && \
     rm -rf \
         /opt/unbound/share/man \
         /tmp/* \
