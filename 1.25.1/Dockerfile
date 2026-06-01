@@ -2,7 +2,6 @@ FROM debian:trixie AS base
 RUN apt-get update && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
-LABEL maintainer="Chris Clark"
 WORKDIR /tmp/src
 
 FROM base AS openssl
@@ -27,8 +26,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
     OPGP_OPENSSL_7=E5E52560DD91C556DDBDA5D02064C53641C25E5D \
     # OpenSSL
     OPGP_OPENSSL_8=BA5473A2B0587B07FB27CF2D216094DFD0CB81EF
-
-WORKDIR /tmp/src
 
 RUN set -e -x && \
     build_deps="build-essential ca-certificates curl dirmngr gnupg libidn2-0-dev libssl-dev" && \
@@ -116,9 +113,11 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
 
 FROM base AS app
 
+ARG NAME=unbound
+
 ENV DEBIAN_FRONTEND=noninteractive \
     UNBOUND_VERSION=1.25.1 \
-    NAME=unbound \
+    NAME=${NAME} \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
 
@@ -150,13 +149,25 @@ WORKDIR /opt/unbound/
 
 ENV PATH=/opt/unbound/sbin:"$PATH"
 
-LABEL org.opencontainers.image.version=${UNBOUND_VERSION} \
-      org.opencontainers.image.title="c2dalark/unbound" \
-      org.opencontainers.image.description="a validating, recursive, and caching DNS resolver" \
-      org.opencontainers.image.url="https://github.com/c2dalark/unbound-docker" \
-      org.opencontainers.image.vendor="Chris Clark" \
+ARG CREATE_TIME="2026-05-31 17:27:26-04:00" \
+    IMAGE_DESCRIPTION="unbound - a validating, recursive, and caching DNS resolver" \
+    IMAGE_URL=c2dalark/unbound \
+    IMAGE_REPO=https://github.com/c2dalark/unbound-docker \
+    IMAGE_AUTHOR="Christopher Clark <c2dalark@users.noreply.github.com>"
+
+LABEL maintainer=${IMAGE_AUTHOR} \
+      org.opencontainers.image.created=${CREATE_TIME} \
+      org.opencontainers.image.authors=${IMAGE_AUTHOR} \
+      org.opencontainers.image.url=${IMAGE_REPO} \
+      org.opencontainers.image.documentation=${IMAGE_REPO} \
+      org.opencontainers.image.source=${IMAGE_REPO} \
+      org.opencontainers.image.version=${UNBOUND_VERSION} \
+      org.opencontainers.image.revision=${UNBOUND_VERSION} \
+      org.opencontainers.image.vendor=${IMAGE_AUTHOR} \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.source="https://github.com/c2dalark/unbound-docker"
+      org.opencontainers.image.ref.name=${UNBOUND_VERSION} \
+      org.opencontainers.image.title=${IMAGE_URL} \
+      org.opencontainers.image.description=${IMAGE_DESCRIPTION}
 
 EXPOSE 53/tcp
 EXPOSE 53/udp
