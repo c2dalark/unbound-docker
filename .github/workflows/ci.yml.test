@@ -20,7 +20,12 @@ jobs:
     with:
       output: image
       push: ${{ github.event_name != 'pull_request' }}
+      platforms: linux/amd64,linux/arm64
       meta-images: c2dalark/unbound
+      meta-tags: |
+        type=ref,event=branch
+        type=ref,event=pr
+        type=semver,pattern={{version}}
     secrets:
       registry-auths: |
         - registry: docker.io
