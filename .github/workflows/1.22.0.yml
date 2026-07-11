@@ -22,7 +22,7 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: c2dalark/unbound
   UNBOUND_BUILD: 1.22.0
-  TAGS: "c2dalark/unbound:1.22.0,"c2dalark/unbound:c1.22.0""
+  TAGS: "c2dalark/unbound:1.22.0,c2dalark/unbound:c1.22.0"
 
 
 jobs:
@@ -97,7 +97,7 @@ jobs:
         #if: ${{ github.event_name != 'pull_request' }}
         env:
           # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
-          TAGS: "1.22.0,v1.22.0"
+          TAGS: ${{ env.TAGS }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
