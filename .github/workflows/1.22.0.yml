@@ -29,7 +29,7 @@ jobs:
     strategy:
       max-parallel: 2
       matrix:
-        image_name: "${{ env.IMAGE_NAME }}"
+        image_name: ${{ env.IMAGE_NAME }}
         unbound_build: [1.21.1,1.22.0]
 
     runs-on: ubuntu-latest
