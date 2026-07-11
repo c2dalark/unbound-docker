@@ -80,7 +80,8 @@ jobs:
           file: ./1.22.0/Dockerfile
           push: ${{ true }}
           #push: ${{ github.event_name != 'pull_request' }}
-          tags: "1.22.0,v1.22.0"
+          #tags: "1.22.0,v1.22.0"
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
