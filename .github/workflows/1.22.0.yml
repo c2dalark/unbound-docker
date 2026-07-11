@@ -87,7 +87,7 @@ jobs:
           push: ${{ true }}
           #push: ${{ github.event_name != 'pull_request' }}
           #tags: "1.22.0,v1.22.0"
-          tags: "${{ matrix.image_name }}:${{ matrix.unbound_build }},${{ matrix.image_name }}:v${{ matrix.unbound_build }}"
+          tags: "${{ matrix.image_name }}:${{ matrix.unbound_build }}, ${{ matrix.image_name }}:v${{ matrix.unbound_build }}"
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -97,11 +97,21 @@ jobs:
       # repository is public to avoid leaking data.  If you would like to publish
       # transparency data even for private images, pass --force to cosign below.
       # https://github.com/sigstore/cosign
-      - name: Sign the published Docker image
+      - name: Sign the first published Docker image
         #if: ${{ github.event_name != 'pull_request' }}
         env:
           # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
-          TAGS: "${{ matrix.image_name }}:${{ matrix.unbound_build }},${{ matrix.image_name }}:v${{ matrix.unbound_build }}"
+          TAGS: "${{ matrix.image_name }}:${{ matrix.unbound_build }}"
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+        # This step uses the identity token to provision an ephemeral certificate
+        # against the sigstore community Fulcio instance.
+        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+      - name: Sign the second published Docker image
+        #if: ${{ github.event_name != 'pull_request' }}
+        env:
+          # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
+          TAGS: "${{ matrix.image_name }}:v${{ matrix.unbound_build }}"
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
