@@ -71,7 +71,6 @@ jobs:
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
-        if: ${{ matrix.unbound_build }} != ${{ env.LATEST }}
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 #v6.2.0
         with:
@@ -82,19 +81,6 @@ jobs:
             type=raw,${{ matrix.unbound_build }}
             type=raw,v${{ matrix.unbound_build }}
             type=raw,value=latest,enable=${{ matrix.unbound_build == env.LATEST }}
-
-      - name: Extract Docker metadata for latest release
-        if: ${{ matrix.unbound_build }} == ${{ env.LATEST }}
-        id: meta
-        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 #v6.2.0
-        with:
-          images: |
-            ${{ matrix.image_name }}
-          tags: |
-            type=sha
-            type=raw,${{ matrix.unbound_build }}
-            type=raw,v${{ matrix.unbound_build }}
-            type=raw,latest
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
