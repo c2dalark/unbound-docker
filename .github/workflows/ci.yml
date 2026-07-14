@@ -26,6 +26,7 @@ jobs:
       matrix:
         image_name: ["c2dalark/unbound"]
         unbound_build: [1.21.1,1.22.0]
+        platform: [linux/amd64]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -46,7 +47,7 @@ jobs:
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
       - name: Install cosign
-        if: ${{ github.event_name != 'pull_request' }}
+        if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
         with:
           cosign-release: 'v2.2.4'
@@ -92,7 +93,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64
+          platforms: ${{ matrix.platform }}
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -102,10 +103,10 @@ jobs:
       # transparency data even for private images, pass --force to cosign below.
       # https://github.com/sigstore/cosign
       - name: Sign the published Docker image
-        if: ${{ github.event_name != 'pull_request' }}
+        if: github.event_name != 'pull_request'
         env:
           # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
-          TAGS: "${{ matrix.image_name }}:${{ matrix.unbound_build }}"
+          TAGS: ${{ steps.meta.outputs.tags }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
