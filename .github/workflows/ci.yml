@@ -11,7 +11,6 @@ on:
   push:
     branches: [ "main" ]
     # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "main" ]
 
@@ -19,16 +18,15 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: docker.io
   # github.repository as <account>/<repo>
+  LATEST: 1.25.0
 
 
 jobs:
   build:
     strategy:
-      max-parallel: 2
       matrix:
         image_name: ["c2dalark/unbound"]
-        unbound_build: [1.21.1,1.22.0]
-
+        unbound_build: [1.21.1,1.22.0,1.23.0,1.23.1,1.24.0,1.24.1,1.24.2,1.25.0]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -49,7 +47,7 @@ jobs:
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
       - name: Install cosign
-        #if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
         with:
           cosign-release: 'v2.2.4'
@@ -63,7 +61,7 @@ jobs:
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
-        #if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
           registry: ${{ env.REGISTRY }}
@@ -73,17 +71,29 @@ jobs:
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
+        if: ${{ matrix.unbound_build }} != ${{ env.LATEST }}
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 #v6.2.0
         with:
           images: |
             ${{ matrix.image_name }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
             type=sha
             type=raw,${{ matrix.unbound_build }}
+            type=raw,v${{ matrix.unbound_build }}
+
+      - name: Extract Docker metadata for latest release
+        if: ${{ matrix.unbound_build }} == ${{ env.LATEST }}
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 #v6.2.0
+        with:
+          images: |
+            ${{ matrix.image_name }}
+          tags: |
+            type=sha
+            type=raw,${{ matrix.unbound_build }}
+            type=raw,v${{ matrix.unbound_build }}
+            type=raw,latest
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
