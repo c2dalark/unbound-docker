@@ -27,6 +27,7 @@ jobs:
       matrix:
         image_name: ["c2dalark/unbound"]
         unbound_build: [1.21.1,1.22.0,1.23.0,1.23.1,1.24.0,1.24.1,1.24.2,1.25.0]
+        platform: [linux/amd64]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -93,7 +94,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64
+          platforms: ${{ matrix.platform }}
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
