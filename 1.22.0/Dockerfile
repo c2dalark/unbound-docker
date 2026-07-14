@@ -123,7 +123,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
 
 
-COPY --from=unbound /opt /opt
+COPY --from=unbound_build /opt /opt
 
 RUN set -x && \
     apt-get update && apt-get install -y --no-install-recommends \
