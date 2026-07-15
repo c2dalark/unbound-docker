@@ -87,7 +87,7 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
     echo "${UNBOUND_SHA256} *unbound.tar.gz" | sha256sum -c - && \
     tar xzf unbound.tar.gz && \
     rm -f unbound.tar.gz && \
-    cd unbound-1.22.0 && \
+    cd unbound-1.19.0 && \
     groupadd _unbound && \
     useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
     ./configure \
