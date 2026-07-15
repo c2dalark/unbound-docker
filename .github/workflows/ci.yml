@@ -18,15 +18,15 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: docker.io
   # github.repository as <account>/<repo>
-  LATEST: 1.22.0
+  LATEST: 1.25.1
 
 jobs:
   build:
     strategy:
       matrix:
         image_name: ["c2dalark/unbound"]
-        unbound_build: [1.21.1,1.22.0]
-        platform: [linux/amd64]
+        unbound_build: [1.25.1,1.22.0,1.21.1]
+        platform: [linux/amd64,linux/arm64]
     runs-on: ubuntu-latest
     permissions:
       contents: read
