@@ -113,7 +113,7 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
     apt-get clean
 
 
-FROM base as unbound
+FROM base AS unbound
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \

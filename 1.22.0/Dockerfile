@@ -114,7 +114,7 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
     apt-get clean
 
 
-FROM base as unbound
+FROM base AS unbound
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
@@ -123,6 +123,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
 
 COPY --from=unbound_build /opt /opt
+
 
 RUN set -x && \
     apt-get update && apt-get install -y --no-install-recommends \

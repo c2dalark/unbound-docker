@@ -2,9 +2,7 @@ FROM debian:trixie AS base
 RUN apt-get update && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
-LABEL maintainer="Chris Clark"
 WORKDIR /tmp/src
-
 
 FROM base AS openssl
 
@@ -59,16 +57,15 @@ RUN set -e -x && \
     rm -rf \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/* && \
-    apt-get clean
+        /var/lib/apt/lists/*
 
-FROM base AS unbound_build
+FROM base AS unbound
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
-    UNBOUND_VERSION=1.19.1 \
-    UNBOUND_SHA256=bc1d576f3dd846a0739adc41ffaa702404c6767d2b6082deb9f2f97cbb24a3a9 \
-    UNBOUND_DOWNLOAD_URL=https://nlnetlabs.nl/downloads/unbound/unbound-1.19.1.tar.gz
+    UNBOUND_VERSION=1.25.1 \
+    UNBOUND_SHA256=0fe8b6277b0959cfd17562debac0aa5f71e0b02dc4ffa9c60271c583edab586f \
+    UNBOUND_DOWNLOAD_URL=https://nlnetlabs.nl/downloads/unbound/unbound-1.25.1.tar.gz
 
 COPY --from=openssl /opt/openssl /opt/openssl
 
@@ -87,10 +84,11 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
     echo "${UNBOUND_SHA256} *unbound.tar.gz" | sha256sum -c - && \
     tar xzf unbound.tar.gz && \
     rm -f unbound.tar.gz && \
-    cd unbound-1.19.1 && \
+    cd unbound-1.25.1 && \
     groupadd _unbound && \
-    useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
+    useradd -g _unbound -s /dev/null -d /etc _unbound && \
     ./configure \
+        --disable-dependency-tracking \
         --prefix=/opt/unbound \
         --with-pthreads \
         --with-username=_unbound \
@@ -110,19 +108,20 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
         /opt/unbound/share/man \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/* && \
-    apt-get clean
+        /var/lib/apt/lists/*
 
 
-FROM base AS unbound
+FROM base AS app
+
+ARG NAME=unbound
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    NAME=unbound \
-    UNBOUND_VERSION=1.19.1 \
+    UNBOUND_VERSION=1.25.1 \
+    NAME=${NAME} \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
 
-COPY --from=unbound_build /opt /opt
+COPY --from=unbound /opt /opt
 
 RUN set -x && \
     apt-get update && apt-get install -y --no-install-recommends \
@@ -134,14 +133,13 @@ RUN set -x && \
       libexpat1 \
       libprotobuf-c1 && \
     groupadd _unbound && \
-    useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
+    useradd -g _unbound -s /dev/null -d /etc _unbound && \
     apt-get purge -y --auto-remove && \
     rm -rf \
         /opt/unbound/share/man \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/* && \
-    apt-get clean
+        /var/lib/apt/lists/*
 
 COPY data/ /
 
@@ -151,13 +149,25 @@ WORKDIR /opt/unbound/
 
 ENV PATH=/opt/unbound/sbin:"$PATH"
 
-LABEL org.opencontainers.image.version=${UNBOUND_VERSION} \
-      org.opencontainers.image.title="c2dalark/unbound" \
-      org.opencontainers.image.description="a validating, recursive, and caching DNS resolver" \
-      org.opencontainers.image.url="https://github.com/c2dalark/unbound-docker" \
-      org.opencontainers.image.vendor="Chris Clark" \
+ARG CREATE_TIME="2026-05-31 17:27:26-04:00" \
+    IMAGE_DESCRIPTION="unbound - a validating, recursive, and caching DNS resolver" \
+    IMAGE_URL=c2dalark/unbound \
+    IMAGE_REPO=https://github.com/c2dalark/unbound-docker \
+    IMAGE_AUTHOR="Christopher Clark <c2dalark@users.noreply.github.com>"
+
+LABEL maintainer=${IMAGE_AUTHOR} \
+      org.opencontainers.image.created=${CREATE_TIME} \
+      org.opencontainers.image.authors=${IMAGE_AUTHOR} \
+      org.opencontainers.image.url=${IMAGE_REPO} \
+      org.opencontainers.image.documentation=${IMAGE_REPO} \
+      org.opencontainers.image.source=${IMAGE_REPO} \
+      org.opencontainers.image.version=${UNBOUND_VERSION} \
+      org.opencontainers.image.revision=${UNBOUND_VERSION} \
+      org.opencontainers.image.vendor=${IMAGE_AUTHOR} \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.source="https://github.com/c2dalark/unbound-docker"
+      org.opencontainers.image.ref.name=${UNBOUND_VERSION} \
+      org.opencontainers.image.title=${IMAGE_URL} \
+      org.opencontainers.image.description=${IMAGE_DESCRIPTION}
 
 EXPOSE 53/tcp
 EXPOSE 53/udp
