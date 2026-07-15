@@ -10,24 +10,29 @@ on:
     - cron: '26 16 * * *'
   push:
     branches: [ "main" ]
-    # Publish semver tags as releases.
   pull_request:
     branches: [ "main" ]
 
 env:
-  # Use docker.io for Docker Hub if empty
   REGISTRY: docker.io
-  # github.repository as <account>/<repo>
+  IMAGE: c2dalark/unbound
   LATEST: 1.25.1
 
 jobs:
   build:
     strategy:
       matrix:
-        image_name: ["c2dalark/unbound"]
-        unbound_build: [1.19.0,1.19.1,1.19.2,1.19.3,1.20.0,1.21.0,1.22.0,1.23.0,1.23.1,1.24.0,1.24.1,1.25.0,1.25.1]
-        platform: [linux/amd64]
-    runs-on: ubuntu-latest
+        build_os: [ubuntu-latest,ubuntu-24.04-arm]
+        unbound_build: [1.25.1,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
+        platform: [linux/amd64,linux/arm64]
+        exclude:
+          - build_os: ubuntu-latest
+            platform: linux/arm64
+          - build_os: ubuntu-latest
+            platform: linux/arm/v7
+          - build_os: ubuntu-24.04-arm
+            platform: linux/amd64
+    runs-on: ${{ matrix.build_os }}
     permissions:
       contents: read
       packages: write
@@ -77,7 +82,7 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 #v6.2.0
         with:
           images: |
-            ${{ matrix.image_name }}
+            ${{ env.IMAGE }}
           tags: |
             type=sha
             type=raw,${{ matrix.unbound_build }}
@@ -100,17 +105,16 @@ jobs:
           cache-from: |
             type=inline
             type=gha
-            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:buildcache
-            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ matrix.unbound_build }}
-            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:latest
-            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE }}:buildcache
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE }}:${{ matrix.unbound_build }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE }}:latest
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE }}
           cache-to: |
             type=inline
             type=gha,mode=max
-            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:buildcache,mode=max
-            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ matrix.unbound_build }},mode=max
-            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:latest,mode=max
-            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }},mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE }}:buildcache,mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE }}:${{ matrix.unbound_build }},mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE }}:latest,mode=max
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
