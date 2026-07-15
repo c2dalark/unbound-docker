@@ -111,6 +111,7 @@ jobs:
             type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:buildcache,mode=max
             type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ matrix.unbound_build }},mode=max
             type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:latest,mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }},mode=max
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
