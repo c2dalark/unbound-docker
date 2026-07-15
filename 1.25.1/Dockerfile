@@ -30,18 +30,17 @@ ENV DEBIAN_FRONTEND=noninteractive \
 RUN set -e -x && \
     build_deps="build-essential ca-certificates curl dirmngr gnupg libidn2-0-dev libssl-dev" && \
     apt-get update && apt-get install -y --no-install-recommends \
-      $build_deps
-
-RUN curl -L $SOURCE_OPENSSL$VERSION_OPENSSL.tar.gz -o openssl.tar.gz && \
+      $build_deps && \
+    curl -L $SOURCE_OPENSSL$VERSION_OPENSSL.tar.gz -o openssl.tar.gz && \
     echo "${SHA256_OPENSSL} ./openssl.tar.gz" | sha256sum -c - && \
     curl -L $SOURCE_OPENSSL$VERSION_OPENSSL.tar.gz.asc -o openssl.tar.gz.asc && \
     GNUPGHOME="$(mktemp -d)" && \
-    export GNUPGHOME
-RUN gpg --no-tty --keyserver keyserver.ubuntu.com --recv-keys "$OPGP_OPENSSL_1" "$OPGP_OPENSSL_2" "$OPGP_OPENSSL_3" "$OPGP_OPENSSL_4" "$OPGP_OPENSSL_5" "$OPGP_OPENSSL_6" "$OPGP_OPENSSL_7" "$OPGP_OPENSSL_8" && \
+    export GNUPGHOME && \
+    gpg --no-tty --keyserver keyserver.ubuntu.com --recv-keys "$OPGP_OPENSSL_1" "$OPGP_OPENSSL_2" "$OPGP_OPENSSL_3" "$OPGP_OPENSSL_4" "$OPGP_OPENSSL_5" "$OPGP_OPENSSL_6" "$OPGP_OPENSSL_7" "$OPGP_OPENSSL_8" && \
     gpg --batch --verify openssl.tar.gz.asc openssl.tar.gz && \
     tar xzf openssl.tar.gz && \
-    cd $VERSION_OPENSSL
-RUN ./config \
+    cd $VERSION_OPENSSL && \
+    ./config \
       --prefix=/opt/openssl \
       --openssldir=/opt/openssl \
       no-weak-ssl-ciphers \
@@ -49,11 +48,11 @@ RUN ./config \
       no-shared \
       enable-ec_nistp_64_gcc_128 \
       -DOPENSSL_NO_HEARTBEATS \
-      -fstack-protector-strong
-RUN make depend && \
+      -fstack-protector-strong && \
+    make depend && \
     nproc | xargs -I % make -j% && \
-    make install_sw
-RUN apt-get purge -y --auto-remove \
+    make install_sw && \
+    apt-get purge -y --auto-remove \
       $build_deps && \
     rm -rf \
         /tmp/* \
