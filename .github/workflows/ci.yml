@@ -102,12 +102,15 @@ jobs:
           cache-from: |
             type=inline
             type=gha
+#            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:latest
 #            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:buildcache
+#            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}
           cache-to: |
             type=inline,mode=max
             type=gha,mode=max
 #            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:buildcache,mode=max
-
+#            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }}:latest,mode=max
+#            type=registry,ref=${{ env.REGISTRY }}/${{ matrix.image_name }},mode=max
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
