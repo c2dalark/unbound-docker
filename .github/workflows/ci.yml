@@ -11,8 +11,8 @@ on:
   push:
     branches: [ "main" ]
     # Publish semver tags as releases.
-#  pull_request:
-#    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 env:
   REGISTRY: docker.io
@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         build_os: [ubuntu-latest,ubuntu-24.04-arm]
-        unbound_build: [1.25.1,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
+        unbound_build: [1.25.1,1.25.0] #,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
         platform: [linux/amd64,linux/arm64]
         exclude:
           - build_os: ubuntu-latest
