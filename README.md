@@ -2,6 +2,12 @@
 
 ## Supported tags and respective `Dockerfile` links
 - [`1.25.1`,`latest` (*1.25.1/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.25.1)
+- [`1.25.0`, (*1.25.0/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.25.0)
+- [`1.24.2`, (*1.24.2/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.24.2)
+- [`1.24.1`, (*1.24.1/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.24.1)
+- [`1.24.0`, (*1.24.0/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.24.0)
+- [`1.23.1`, (*1.23.1/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.23.1)
+- [`1.23.0`, (*1.23.0/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.23.0)
 - [`1.22.0`, (*1.22.0/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.22.0)
 - [`1.21.1`, (*1.21.1/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.21.1)
 - [`1.21.0`, (*1.21.0/Dockerfile*)](https://github.com/c2dalark/unbound-docker/tree/main/1.21.0)
