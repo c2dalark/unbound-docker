@@ -8,8 +8,9 @@ WORKDIR /tmp/src
 
 FROM base AS openssl
 
-ENV VERSION_OPENSSL=openssl-3.2.1 \
-    SHA256_OPENSSL=83c7329fe52c850677d75e5d0b0ca245309b97e8ecbcfdc1dfdc4ab9fac35b39 \
+ENV DEBIAN_FRONTEND=noninteractive \
+    VERSION_OPENSSL=openssl-3.5.6 \
+    SHA256_OPENSSL=deae7c80cba99c4b4f940ecadb3c3338b13cb77418409238e57d7f31f2a3b736 \
     SOURCE_OPENSSL=https://www.openssl.org/source/ \
     # OpenSSL OMC
     OPGP_OPENSSL_1=EFC0A467D613CB83C7ED6D30D894E2CE8B3D79F5 \
@@ -65,9 +66,9 @@ FROM base AS unbound_build
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
-    UNBOUND_VERSION=1.19.0 \
-    UNBOUND_SHA256=a97532468854c61c2de48ca4170de854fd3bc95c8043bb0cfb0fe26605966624 \
-    UNBOUND_DOWNLOAD_URL=https://nlnetlabs.nl/downloads/unbound/unbound-1.19.0.tar.gz
+    UNBOUND_VERSION=1.25.0 \
+    UNBOUND_SHA256=062a6eda723fe2f041bee4079b76981569f1d12e066bbd74800242fc1ebddec7 \
+    UNBOUND_DOWNLOAD_URL=https://nlnetlabs.nl/downloads/unbound/unbound-1.25.0.tar.gz
 
 COPY --from=openssl /opt/openssl /opt/openssl
 
@@ -86,7 +87,7 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
     echo "${UNBOUND_SHA256} *unbound.tar.gz" | sha256sum -c - && \
     tar xzf unbound.tar.gz && \
     rm -f unbound.tar.gz && \
-    cd unbound-1.19.0 && \
+    cd unbound-1.25.0 && \
     groupadd _unbound && \
     useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
     ./configure \
@@ -117,7 +118,7 @@ FROM base as unbound
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
-    UNBOUND_VERSION=1.19.0 \
+    UNBOUND_VERSION=1.25.0 \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
 
