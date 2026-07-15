@@ -1,10 +1,16 @@
-FROM debian:trixie AS openssl
-RUN apt-get update && apt-get upgrade -y
+FROM debian:trixie AS base
+RUN apt-get update && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 LABEL maintainer="Chris Clark"
+WORKDIR /tmp/src
+
+
+FROM base AS openssl
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    VERSION_OPENSSL=openssl-3.3.2 \
-    SHA256_OPENSSL=2e8a40b01979afe8be0bbfb3de5dc1c6709fedb46d6c89c10da114ab5fc3d281 \
+    VERSION_OPENSSL=openssl-3.5.6 \
+    SHA256_OPENSSL=deae7c80cba99c4b4f940ecadb3c3338b13cb77418409238e57d7f31f2a3b736 \
     SOURCE_OPENSSL=https://www.openssl.org/source/ \
     # OpenSSL OMC
     OPGP_OPENSSL_1=EFC0A467D613CB83C7ED6D30D894E2CE8B3D79F5 \
@@ -22,8 +28,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
     OPGP_OPENSSL_7=E5E52560DD91C556DDBDA5D02064C53641C25E5D \
     # OpenSSL
     OPGP_OPENSSL_8=BA5473A2B0587B07FB27CF2D216094DFD0CB81EF
-
-WORKDIR /tmp/src
 
 RUN set -e -x && \
     build_deps="build-essential ca-certificates curl dirmngr gnupg libidn2-0-dev libssl-dev" && \
@@ -55,11 +59,10 @@ RUN set -e -x && \
     rm -rf \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/*
+        /var/lib/apt/lists/* && \
+    apt-get clean
 
-FROM debian:trixie AS unbound
-RUN apt-get update && apt-get upgrade -y
-LABEL maintainer="Chris Clark"
+FROM base AS unbound_build
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
@@ -67,11 +70,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
     UNBOUND_SHA256=c5dd1bdef5d5685b2cedb749158dd152c52d44f65529a34ac15cd88d4b1b3d43 \
     UNBOUND_DOWNLOAD_URL=https://nlnetlabs.nl/downloads/unbound/unbound-1.22.0.tar.gz
 
-WORKDIR /tmp/src
-
 COPY --from=openssl /opt/openssl /opt/openssl
 
-RUN build_deps="curl gcc libc-dev libevent-dev libexpat1-dev libnghttp2-dev make" && \
+RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexpat1-dev libnghttp2-dev make" && \
     set -x && \
     apt-get update && apt-get install -y --no-install-recommends \
       $build_deps \
@@ -88,9 +89,8 @@ RUN build_deps="curl gcc libc-dev libevent-dev libexpat1-dev libnghttp2-dev make
     rm -f unbound.tar.gz && \
     cd unbound-1.22.0 && \
     groupadd _unbound && \
-    useradd -g _unbound -s /dev/null -d /etc _unbound && \
+    useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
     ./configure \
-        --disable-dependency-tracking \
         --prefix=/opt/unbound \
         --with-pthreads \
         --with-username=_unbound \
@@ -110,21 +110,19 @@ RUN build_deps="curl gcc libc-dev libevent-dev libexpat1-dev libnghttp2-dev make
         /opt/unbound/share/man \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/*
+        /var/lib/apt/lists/* && \
+    apt-get clean
 
 
-FROM debian:trixie
-RUN apt-get update && apt-get upgrade -y
-LABEL maintainer="Chris Clark"
+FROM base as unbound
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
+    UNBOUND_VERSION=1.22.0 \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
 
-WORKDIR /tmp/src
-
-COPY --from=unbound /opt /opt
+COPY --from=unbound_build /opt /opt
 
 
 RUN set -x && \
@@ -137,14 +135,14 @@ RUN set -x && \
       libexpat1 \
       libprotobuf-c1 && \
     groupadd _unbound && \
-    useradd -g _unbound -s /dev/null -d /etc _unbound && \
-    apt-get purge -y --auto-remove \
-      $build_deps && \
+    useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
+    apt-get purge -y --auto-remove && \
     rm -rf \
         /opt/unbound/share/man \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/*
+        /var/lib/apt/lists/* && \
+    apt-get clean
 
 COPY data/ /
 
