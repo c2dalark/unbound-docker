@@ -1,6 +1,12 @@
-FROM debian:trixie AS openssl
-RUN apt-get update && apt-get upgrade -y
+FROM debian:trixie AS base
+RUN apt-get update && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 LABEL maintainer="Chris Clark"
+WORKDIR /tmp/src
+
+
+FROM base AS openssl
 
 ENV DEBIAN_FRONTEND=noninteractive \
     VERSION_OPENSSL=openssl-3.5.6 \
@@ -23,11 +29,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
     # OpenSSL
     OPGP_OPENSSL_8=BA5473A2B0587B07FB27CF2D216094DFD0CB81EF
 
-WORKDIR /tmp/src
-
 RUN set -e -x && \
     build_deps="build-essential ca-certificates curl dirmngr gnupg libidn2-0-dev libssl-dev" && \
-    DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update && apt-get install -y --no-install-recommends \
       $build_deps && \
     curl -L $SOURCE_OPENSSL$VERSION_OPENSSL.tar.gz -o openssl.tar.gz && \
     echo "${SHA256_OPENSSL} ./openssl.tar.gz" | sha256sum -c - && \
@@ -55,19 +59,16 @@ RUN set -e -x && \
     rm -rf \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/*
+        /var/lib/apt/lists/* && \
+    apt-get clean
 
-FROM debian:trixie AS unbound
-RUN apt-get update && apt-get upgrade -y
-LABEL maintainer="Chris Clark"
+FROM base AS unbound_build
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
     UNBOUND_VERSION=1.24.2 \
     UNBOUND_SHA256=44e7b53e008a6dcaec03032769a212b46ab5c23c105284aa05a4f3af78e59cdb \
     UNBOUND_DOWNLOAD_URL=https://nlnetlabs.nl/downloads/unbound/unbound-1.24.2.tar.gz
-
-WORKDIR /tmp/src
 
 COPY --from=openssl /opt/openssl /opt/openssl
 
@@ -88,9 +89,8 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
     rm -f unbound.tar.gz && \
     cd unbound-1.24.2 && \
     groupadd _unbound && \
-    useradd -g _unbound -s /dev/null -d /etc _unbound && \
+    useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
     ./configure \
-        --disable-dependency-tracking \
         --prefix=/opt/unbound \
         --with-pthreads \
         --with-username=_unbound \
@@ -110,24 +110,22 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
         /opt/unbound/share/man \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/*
+        /var/lib/apt/lists/* && \
+    apt-get clean
 
 
-FROM debian:trixie
-RUN apt-get update && apt-get upgrade -y
-LABEL maintainer="Chris Clark"
+FROM base as unbound
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
+    UNBOUND_VERSION=1.24.2 \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
 
-WORKDIR /tmp/src
-
-COPY --from=unbound /opt /opt
+COPY --from=unbound_build /opt /opt
 
 RUN set -x && \
-    DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update && apt-get install -y --no-install-recommends \
       bsdmainutils \
       ca-certificates \
       ldnsutils \
@@ -136,14 +134,14 @@ RUN set -x && \
       libexpat1 \
       libprotobuf-c1 && \
     groupadd _unbound && \
-    useradd -g _unbound -s /dev/null -d /etc _unbound && \
-    apt-get purge -y --auto-remove \
-      $build_deps && \
+    useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
+    apt-get purge -y --auto-remove && \
     rm -rf \
         /opt/unbound/share/man \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/*
+        /var/lib/apt/lists/* && \
+    apt-get clean
 
 COPY data/ /
 
