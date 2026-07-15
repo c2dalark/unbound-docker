@@ -122,7 +122,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
 
-
 COPY --from=unbound_build /opt /opt
 
 RUN set -x && \
