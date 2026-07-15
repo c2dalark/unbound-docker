@@ -11,23 +11,27 @@ on:
   push:
     branches: [ "main" ]
     # Publish semver tags as releases.
-  pull_request:
-    branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
 
 env:
-  # Use docker.io for Docker Hub if empty
   REGISTRY: docker.io
-  # github.repository as <account>/<repo>
+  IMAGE: c2dalark/unbound
   LATEST: 1.25.1
 
 jobs:
   build:
     strategy:
       matrix:
-        image_name: ["c2dalark/unbound"]
+        build_os: [ubuntu-latest,ubuntu-24.04-arm]
         unbound_build: [1.25.1,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
         platform: [linux/amd64,linux/arm64]
-    runs-on: ubuntu-latest
+        exclude:
+          - build_os: ubuntu-latest
+            platform: linux/arm64
+          - build_os: ubuntu-24.04-arm
+            platform: linux/amd64
+    runs-on: ${{ matrix.build_os }}
     permissions:
       contents: read
       packages: write
@@ -78,7 +82,7 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 #v6.2.0
         with:
           images: |
-            ${{ matrix.image_name }}
+            ${{ env.IMAGE }}
           tags: |
             type=sha
             type=raw,${{ matrix.unbound_build }}
