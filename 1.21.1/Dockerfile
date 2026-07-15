@@ -91,7 +91,6 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
     groupadd _unbound && \
     useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
     ./configure \
-        --disable-dependency-tracking \
         --prefix=/opt/unbound \
         --with-pthreads \
         --with-username=_unbound \
