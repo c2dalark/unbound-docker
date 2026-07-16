@@ -11,11 +11,6 @@ on:
 permissions:
   contents: read
 
-env:
-  IMAGE: c2dalark/unbound
-  CACHE: c2dalark/unbound-buildcache
-  LATEST: 1.25.1
-
 jobs:
   metadata_gen:
     runs-on: ubuntu-latest
@@ -50,7 +45,7 @@ jobs:
         type=raw,value=latest
       set-meta-annotations: true
       set-meta-labels: true
-      envs: |
+      build-args: |
         SOURCE_DATE_EPOCH: 0
     secrets:
       registry-auths: |
