@@ -26,12 +26,12 @@ env:
   PLATFORMS: linux/amd64,linux/arm64
 
 jobs:
-  pre-build:
+  pre-build-arm:
     strategy:
       matrix:
         build_os: [ubuntu-latest,ubuntu-24.04-arm]
         unbound_build: [1.19.0,1.19.1,1.19.2,1.19.3,1.20.0,1.21.0,1.21.1,1.22.0,1.23.0,1.23.1,1.24.0,1.24.1,1.24.2,1.25.0,1.25.1]
-        arch: [amd64,arm64]
+        arch: [arm64]
         target_os: [linux]
         exclude:
           - build_os: ubuntu-latest
@@ -145,7 +145,7 @@ jobs:
           path: ${{ runner.temp }}
 
       - name: Load images
-        run: find ${{ runner.temp }} -iname c2dalark-unbound* -exec docker load --input {} \;
+        run: find ${{ runner.temp }} -iname c2dalark-unbound*arm* -exec docker load --input {} \;
 
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
