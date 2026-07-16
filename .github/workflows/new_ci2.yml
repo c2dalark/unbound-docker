@@ -106,11 +106,14 @@ jobs:
           cache-from: |
             type=inline
             type=gha
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}-min
           cache-to: |
             type=inline
             type=gha,mode=max
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }},mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}-min,mode=min
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
@@ -207,6 +210,7 @@ jobs:
           cache-from: |
             type=inline
             type=gha
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-amd64
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-arm64
           cache-to: |
