@@ -84,7 +84,6 @@ jobs:
           images: |
             ${{ env.IMAGE }}
           tags: |
-            type=sha
             type=raw,${{ matrix.unbound_build }}
             type=raw,v${{ matrix.unbound_build }}
             type=raw,value=latest,enable=${{ matrix.unbound_build == env.LATEST }}
@@ -190,7 +189,6 @@ jobs:
           images: |
             ${{ env.IMAGE }}
           tags: |
-            type=sha
             type=raw,${{ matrix.unbound_build }}
             type=raw,v${{ matrix.unbound_build }}
             type=raw,value=latest,enable=${{ matrix.unbound_build == env.LATEST }}
