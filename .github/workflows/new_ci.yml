@@ -45,21 +45,21 @@ jobs:
       cache-from: |
         type=inline
         type=gha
-        type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}
+        type=registry,ref=docker.io/c2dalark/unbound-buildcache:${{ matrix.unbound_build }}
       cache-to: |
         type=inline
         type=gha,mode=max
-        type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }},mode=max
+        type=registry,ref=docker.io/c2dalark/unbound-buildcache:${{ matrix.unbound_build }},mode=max
       meta-images: c2dalark/unbound
       meta-tags: |
         type=sha
         type=raw,${{ matrix.unbound_build }}
         type=raw,v${{ matrix.unbound_build }}
-        type=raw,value=latest,enable=${{ matrix.unbound_build == env.LATEST }
+        type=raw,value=latest,enable=${{ matrix.unbound_build == 1.25.1 }
       set-meta-annotations: true
       set-meta-labels: true
       envs: |
-        SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+        SOURCE_DATE_EPOCH: 0
     secrets:
       registry-auths: |
         - registry: docker.io
