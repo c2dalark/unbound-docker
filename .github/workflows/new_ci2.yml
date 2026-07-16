@@ -19,6 +19,10 @@ env:
   CACHE: c2dalark/unbound-buildcache
   IMAGE-HYPHEN: c2dalark-unbound
   LATEST: 1.25.1
+  BUILD_OS: "[ubuntu-latest,ubuntu-24.04-arm]"
+  UNBOUND_BUILD: "[1.25.1,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]"
+  ARCH: "[amd64,arm64]"
+  TARGET_OS: "[linux]"
   PLATFORMS: linux/amd64,linux/arm64
 
 jobs:
@@ -56,7 +60,7 @@ jobs:
     needs: define-matrix
     strategy:
       matrix:
-        build_os: ${{ fromJSON(needs.define-matrix.outputs.build_os) }}
+        build_os: ${{ fromJSON(env.BUILD_OS) }}
         unbound_build: ${{ fromJSON(needs.define-matrix.outputs.unbound_build) }}
         arch: ${{ fromJSON(needs.define-matrix.outputs.arch) }}
         target_os: ${{ fromJSON(needs.define-matrix.outputs.target_os) }}
