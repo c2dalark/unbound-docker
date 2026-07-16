@@ -55,7 +55,7 @@ jobs:
         type=sha
         type=raw,${{ matrix.unbound_build }}
         type=raw,v${{ matrix.unbound_build }}
-        type=raw,value=latest,enable=${{ matrix.unbound_build == 1.25.1 }
+        type=raw,value=latest,enable=${{ matrix.unbound_build == 1.25.1 }}
       set-meta-annotations: true
       set-meta-labels: true
       envs: |
