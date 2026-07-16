@@ -42,14 +42,6 @@ jobs:
       cache: true
       cache-scope: c2dalark/unbound
       cache-mode: max
-      cache-from: |
-        type=inline
-        type=gha
-        type=registry,ref=docker.io/c2dalark/unbound-buildcache:${{ matrix.unbound_build }}
-      cache-to: |
-        type=inline
-        type=gha,mode=max
-        type=registry,ref=docker.io/c2dalark/unbound-buildcache:${{ matrix.unbound_build }},mode=max
       meta-images: c2dalark/unbound
       meta-tags: |
         type=sha
