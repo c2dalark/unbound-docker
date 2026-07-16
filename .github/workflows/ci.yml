@@ -23,18 +23,8 @@ jobs:
   build:
     strategy:
       matrix:
-        build_os: [ubuntu-latest,ubuntu-24.04-arm]
         unbound_build: [1.25.1,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
-        arch: [amd64,arm64]
-        target_os: [linux]
-        exclude:
-          - build_os: ubuntu-latest
-            arch: arm64
-          - build_os: ubuntu-latest
-            arch: arm/v7
-          - build_os: ubuntu-24.04-arm
-            arch: amd64
-    runs-on: ${{ matrix.build_os }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
@@ -102,16 +92,16 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: ${{ matrix.target_os }}/${{ matrix.arch }}
+          platforms: linux/amd64,linux/arm64
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: |
             type=inline
             type=gha
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}${{ matrix.arch }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}
           cache-to: |
             type=inline
             type=gha,mode=max
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}${{ matrix.arch }},mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }},mode=max
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
