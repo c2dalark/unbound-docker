@@ -40,7 +40,7 @@ jobs:
       context: ./${{ matrix.unbound_build }}/
       platforms: linux/amd64,linux/arm64
       cache: true
-      cache-scope: ${{ env.IMAGE }}
+      cache-scope: c2dalark/unbound
       cache-mode: max
       cache-from: |
         type=inline
@@ -50,7 +50,7 @@ jobs:
         type=inline
         type=gha,mode=max
         type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }},mode=max
-      meta-images: ${{ env.IMAGE }}
+      meta-images: c2dalark/unbound
       meta-tags: |
         type=sha
         type=raw,${{ matrix.unbound_build }}
