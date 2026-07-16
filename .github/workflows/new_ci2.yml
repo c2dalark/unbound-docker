@@ -104,11 +104,11 @@ jobs:
           platforms: ${{ matrix.target_os }}/${{ matrix.arch }}
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: |
-            type=inline
-            type=gha
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}-min
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
+            type=inline
+            type=gha
           cache-to: |
             type=inline
             type=gha,mode=max
@@ -208,11 +208,13 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: |
-            type=inline
-            type=gha
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-amd64
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-arm64
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-amd64-min
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-arm64-min
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
+            type=inline
+            type=gha
           cache-to: |
             type=inline
         env:
