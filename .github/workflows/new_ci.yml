@@ -1,0 +1,68 @@
+name: new_ci
+
+on:
+  schedule:
+    - cron: '26 16 * * *'
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: c2dalark/unbound
+  CACHE: c2dalark/unbound-buildcache
+  LATEST: 1.25.1
+
+jobs:
+  metadata_gen:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
+      - name: Get Git commit timestamps
+        run: echo "TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
+  build:
+    strategy:
+      matrix:
+        unbound_build: [1.25.1,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
+    uses: docker/github-builder/.github/workflows/build.yml@v1
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      output: image
+      push: true
+      context: ./${{ matrix.unbound_build }}/
+      platforms: linux/amd64,linux/arm64
+      cache: true
+      cache-scope: ${{ env.IMAGE }}
+      cache-mode: max
+      cache-from: |
+        type=inline
+        type=gha
+        type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}
+      cache-to: |
+        type=inline
+        type=gha,mode=max
+        type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }},mode=max
+      meta-images: ${{ env.IMAGE }}
+      meta-tags: |
+        type=sha
+        type=raw,${{ matrix.unbound_build }}
+        type=raw,v${{ matrix.unbound_build }}
+        type=raw,value=latest,enable=${{ matrix.unbound_build == env.LATEST }
+      set-meta-annotations: true
+      set-meta-labels: true
+      env: |
+        SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+    secrets:
+      registry-auths: |
+        - registry: docker.io
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
