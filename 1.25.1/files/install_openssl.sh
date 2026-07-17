@@ -31,6 +31,8 @@ tar xzf openssl.tar.gz
 cd $VERSION_OPENSSL
 
 ## Build configure flags
+echo $TARGETPLATFORM
+## Add logic to determine platform if none is supplied
 config_flags = "--prefix=/opt/openssl --openssldir=/opt/openssl no-weak-ssl-ciphers no-ssl3 no-shared -DOPENSSL_NO_HEARTBEATS -fstack-protector-strong "
 if [ ( "$TARGETPLATFORM" == "linux/amd64" ) || ( "$TARGETPLATFORM" == "linux/arm64" ) ]
     echo "Building configure flags for 64bit arch"
@@ -41,8 +43,9 @@ else
     echo "Unsupported build arch!"
     exit 1
 fi
+
 ## Configure and Build ##
-./config $config_flags
+./config "$config_flags"
 make depend
 nproc | xargs -I % make -j%
 make install_sw
