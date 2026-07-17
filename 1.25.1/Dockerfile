@@ -1,4 +1,6 @@
 FROM debian:trixie AS base
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 RUN apt-get update && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
@@ -8,24 +10,9 @@ FROM base AS openssl
 
 ENV DEBIAN_FRONTEND=noninteractive \
     VERSION_OPENSSL=openssl-3.5.6 \
-    SHA256_OPENSSL=deae7c80cba99c4b4f940ecadb3c3338b13cb77418409238e57d7f31f2a3b736 \
-    SOURCE_OPENSSL=https://www.openssl.org/source/ \
-    # OpenSSL OMC
-    OPGP_OPENSSL_1=EFC0A467D613CB83C7ED6D30D894E2CE8B3D79F5 \
-    # Richard Levitte
-    OPGP_OPENSSL_2=7953AC1FBC3DC8B3B292393ED5E9E43F7DF9EE8C \
-    # Matt Caswell
-    OPGP_OPENSSL_3=8657ABB260F056B1E5190839D9C4D26D0E604491 \
-    # Paul Dale
-    OPGP_OPENSSL_4=B7C1C14360F353A36862E4D5231C84CDDCC69C45 \
-    # Tomas Mraz
-    OPGP_OPENSSL_5=A21FAB74B0088AA361152586B8EF1A6BA9DA2D5C \
-    # Tim Hudson
-    OPGP_OPENSSL_6=C1F33DD8CE1D4CC613AF14DA9195C48241FBF7DD \
-    # Kurt Roeckx
-    OPGP_OPENSSL_7=E5E52560DD91C556DDBDA5D02064C53641C25E5D \
-    # OpenSSL
-    OPGP_OPENSSL_8=BA5473A2B0587B07FB27CF2D216094DFD0CB81EF
+    SHA256_OPENSSL=deae7c80cba99c4b4f940ecadb3c3338b13cb77418409238e57d7f31f2a3b736
+
+COPY ./files/install_openssl.sh .
 
 RUN set -e -x && \
     build_deps="build-essential ca-certificates curl dirmngr gnupg libidn2-0-dev libssl-dev" && \
