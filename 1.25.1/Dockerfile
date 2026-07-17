@@ -13,38 +13,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     SHA256_OPENSSL=deae7c80cba99c4b4f940ecadb3c3338b13cb77418409238e57d7f31f2a3b736
 
 COPY ./files/install_openssl.sh .
+RUN ./instal_openssl.sh
 
-RUN set -e -x && \
-    build_deps="build-essential ca-certificates curl dirmngr gnupg libidn2-0-dev libssl-dev" && \
-    apt-get update && apt-get install -y --no-install-recommends \
-      $build_deps && \
-    curl -L $SOURCE_OPENSSL$VERSION_OPENSSL.tar.gz -o openssl.tar.gz && \
-    echo "${SHA256_OPENSSL} ./openssl.tar.gz" | sha256sum -c - && \
-    curl -L $SOURCE_OPENSSL$VERSION_OPENSSL.tar.gz.asc -o openssl.tar.gz.asc && \
-    GNUPGHOME="$(mktemp -d)" && \
-    export GNUPGHOME && \
-    gpg --no-tty --keyserver keyserver.ubuntu.com --recv-keys "$OPGP_OPENSSL_1" "$OPGP_OPENSSL_2" "$OPGP_OPENSSL_3" "$OPGP_OPENSSL_4" "$OPGP_OPENSSL_5" "$OPGP_OPENSSL_6" "$OPGP_OPENSSL_7" "$OPGP_OPENSSL_8" && \
-    gpg --batch --verify openssl.tar.gz.asc openssl.tar.gz && \
-    tar xzf openssl.tar.gz && \
-    cd $VERSION_OPENSSL && \
-    ./config \
-      --prefix=/opt/openssl \
-      --openssldir=/opt/openssl \
-      no-weak-ssl-ciphers \
-      no-ssl3 \
-      no-shared \
-      enable-ec_nistp_64_gcc_128 \
-      -DOPENSSL_NO_HEARTBEATS \
-      -fstack-protector-strong && \
-    make depend && \
-    nproc | xargs -I % make -j% && \
-    make install_sw && \
-    apt-get purge -y --auto-remove \
-      $build_deps && \
-    rm -rf \
-        /tmp/* \
-        /var/tmp/* \
-        /var/lib/apt/lists/*
 
 FROM base AS unbound
 
