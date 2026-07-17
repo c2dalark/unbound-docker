@@ -13,7 +13,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     SHA256_OPENSSL=deae7c80cba99c4b4f940ecadb3c3338b13cb77418409238e57d7f31f2a3b736
 
 COPY ./files/install_openssl.sh .
-RUN ./instal_openssl.sh
+RUN ./install_openssl.sh
 
 
 FROM base AS unbound
