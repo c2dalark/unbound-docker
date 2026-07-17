@@ -2,7 +2,7 @@ FROM debian:trixie AS base
 RUN apt-get update && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
-LABEL maintainer="Chris Clark"
+LABEL maintainer="Christopher Clark <c2dalark@users.noreply.github.com>"
 WORKDIR /tmp/src
 
 
@@ -152,13 +152,23 @@ WORKDIR /opt/unbound/
 
 ENV PATH=/opt/unbound/sbin:"$PATH"
 
-LABEL org.opencontainers.image.version=${UNBOUND_VERSION} \
-      org.opencontainers.image.title="c2dalark/unbound" \
-      org.opencontainers.image.description="a validating, recursive, and caching DNS resolver" \
-      org.opencontainers.image.url="https://github.com/c2dalark/unbound-docker" \
-      org.opencontainers.image.vendor="Chris Clark" \
+ARG IMAGE_DESCRIPTION="unbound - a validating, recursive, and caching DNS resolver" \
+    IMAGE_URL=c2dalark/unbound \
+    IMAGE_REPO=https://github.com/c2dalark/unbound-docker \
+    IMAGE_AUTHOR="Christopher Clark <c2dalark@users.noreply.github.com>"
+
+LABEL maintainer=${IMAGE_AUTHOR} \
+      org.opencontainers.image.authors=${IMAGE_AUTHOR} \
+      org.opencontainers.image.url=${IMAGE_REPO} \
+      org.opencontainers.image.documentation=${IMAGE_REPO} \
+      org.opencontainers.image.source=${IMAGE_REPO} \
+      org.opencontainers.image.version=${UNBOUND_VERSION} \
+      org.opencontainers.image.revision=${UNBOUND_VERSION} \
+      org.opencontainers.image.vendor=${IMAGE_AUTHOR} \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.source="https://github.com/c2dalark/unbound-docker"
+      org.opencontainers.image.ref.name=${UNBOUND_VERSION} \
+      org.opencontainers.image.title=${IMAGE_URL} \
+      org.opencontainers.image.description=${IMAGE_DESCRIPTION}
 
 EXPOSE 53/tcp
 EXPOSE 53/udp

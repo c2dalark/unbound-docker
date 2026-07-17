@@ -1,5 +1,5 @@
 FROM debian:bullseye AS openssl
-LABEL maintainer="Chris Clark"
+LABEL maintainer="Christopher Clark <c2dalark@users.noreply.github.com>"
 
 ENV VERSION_OPENSSL=openssl-3.1.3 \
     SHA256_OPENSSL=f0316a2ebd89e7f2352976445458689f80302093788c466692fb2a188b2eacf6 \
@@ -50,7 +50,7 @@ RUN set -e -x && \
         /var/lib/apt/lists/*
 
 FROM debian:bullseye AS unbound
-LABEL maintainer="Chris Clark"
+LABEL maintainer="Christopher Clark <c2dalark@users.noreply.github.com>"
 
 ENV NAME=unbound \
     UNBOUND_VERSION=1.17.1 \
@@ -104,7 +104,7 @@ RUN build_deps="curl gcc libc-dev libevent-dev libexpat1-dev libnghttp2-dev make
 
 
 FROM debian:bullseye
-LABEL maintainer="Chris Clark"
+LABEL maintainer="Christopher Clark <c2dalark@users.noreply.github.com>"
 
 ENV NAME=unbound \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
