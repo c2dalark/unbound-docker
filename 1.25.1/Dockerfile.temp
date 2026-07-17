@@ -2,8 +2,6 @@ ARG BUILDPLATFORM
 FROM --platform=$BUILDPLATFORM debian:trixie AS build_base
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
-ARG TARGETOS
-ARG TARGETARCH
 LABEL maintainer="Christopher Clark <c2dalark@users.noreply.github.com>"
 WORKDIR /tmp/src
 
@@ -18,8 +16,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
     SHA256_OPENSSL=deae7c80cba99c4b4f940ecadb3c3338b13cb77418409238e57d7f31f2a3b736
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
-ARG TARGETOS
-ARG TARGETARCH
+
+COPY ./files/test.sh .
+RUN ./test.sh
 
 COPY ./files/openssl.sh .
 RUN ./openssl.sh
@@ -40,7 +39,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     UNBOUND_SHA256=0fe8b6277b0959cfd17562debac0aa5f71e0b02dc4ffa9c60271c583edab586f \
     UNBOUND_DOWNLOAD_URL=https://nlnetlabs.nl/downloads/unbound/unbound-1.25.1.tar.gz
 
-COPY --from=openssl /opt/openssl /opt/openssl
+COPY --from=openssl_build /opt/openssl /opt/openssl
 
 RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexpat1-dev libnghttp2-dev make" && \
     set -x && \
@@ -84,10 +83,9 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
     apt-get clean
 
 
-FROM --platform=TARGETPLATFORM debian:trixie AS unbound
-
-ENV DEBIAN_FRONTEND=noninteractive \
-    NAME=unbound \
+FROM debian:trixie AS unbound
+ARG NAME=unbound
+ENV NAME="${NAME}" \
     UNBOUND_VERSION=1.25.1 \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
@@ -95,7 +93,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 COPY --from=unbound_build /opt /opt
 
 RUN set -x && \
-    apt-get update && apt-get install -y --no-install-recommends \
+    DEBIAN_FRONTEND=noninteractive apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
       bsdmainutils \
       ca-certificates \
       ldnsutils \
