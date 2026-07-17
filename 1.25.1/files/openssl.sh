@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-## Set ENVs, install requirements, verify source code
 set -e -x
 export SOURCE_OPENSSL="https://www.openssl.org/source/"
     # OpenSSL OMC
@@ -20,37 +19,28 @@ export OPGP_OPENSSL_7="E5E52560DD91C556DDBDA5D02064C53641C25E5D"
     # OpenSSL
 export OPGP_OPENSSL_8="BA5473A2B0587B07FB27CF2D216094DFD0CB81EF"
 export build_deps="build-essential ca-certificates curl dirmngr gnupg libidn2-0-dev libssl-dev"
-apt-get update && apt-get install -y --no-install-recommends $build_deps
+build_deps="build-essential ca-certificates curl dirmngr gnupg libidn2-0-dev libssl-dev"
+apt-get update && apt-get install -y --no-install-recommends \
+  $build_deps
 curl -L $SOURCE_OPENSSL$VERSION_OPENSSL.tar.gz -o openssl.tar.gz
 echo "${SHA256_OPENSSL} ./openssl.tar.gz" | sha256sum -c -
 curl -L $SOURCE_OPENSSL$VERSION_OPENSSL.tar.gz.asc -o openssl.tar.gz.asc
-GNUPGHOME="$(mktemp -d)" && export GNUPGHOME
+export GNUPGHOME="$(mktemp -d)"
 gpg --no-tty --keyserver keyserver.ubuntu.com --recv-keys "$OPGP_OPENSSL_1" "$OPGP_OPENSSL_2" "$OPGP_OPENSSL_3" "$OPGP_OPENSSL_4" "$OPGP_OPENSSL_5" "$OPGP_OPENSSL_6" "$OPGP_OPENSSL_7" "$OPGP_OPENSSL_8"
 gpg --batch --verify openssl.tar.gz.asc openssl.tar.gz
 tar xzf openssl.tar.gz
 cd $VERSION_OPENSSL
-
-## Build configure flags
-echo "$TARGETPLATFORM"
-## Add logic to determine platform if none is supplied
-config_flags="--prefix=/opt/openssl --openssldir=/opt/openssl no-weak-ssl-ciphers no-ssl3 no-shared -DOPENSSL_NO_HEARTBEATS -fstack-protector-strong "
-build_arch=$(uname -m)
-if [ $build_arch == "x86_64" ]; then
-    echo "Building configure flags for 64bit arch"
-    config_flags="$config_flags enable-ec_nistp_64_gcc_128 "
-elif [ $build_arch == "armv7l" ]; then
-    echo "Building configure flags for 32bit arch"
-    config_flags="linux-32 $config_flags"
-else
-    echo "Unsupported target/build arch!"
-    exit 1
-fi
-
-echo "$config_flags"
-### Configure and Build ##
-#./config "$config_flags"
-#make depend
-#nproc | xargs -I % make -j%
-#make install_sw
-#
-#exit 0
+./config \
+  --prefix=/opt/openssl \
+  --openssldir=/opt/openssl \
+  no-weak-ssl-ciphers \
+  no-ssl3 \
+  no-shared \
+  enable-ec_nistp_64_gcc_128 \
+  -DOPENSSL_NO_HEARTBEATS \
+  -fstack-protector-strong
+make depend
+nproc | xargs -I % make -j%
+make install_sw
+apt-get purge -y --auto-remove \
+  $build_deps
