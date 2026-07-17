@@ -150,14 +150,12 @@ WORKDIR /opt/unbound/
 
 ENV PATH=/opt/unbound/sbin:"$PATH"
 
-ARG CREATE_TIME="2026-05-31 17:27:26-04:00" \
-    IMAGE_DESCRIPTION="unbound - a validating, recursive, and caching DNS resolver" \
+ARG IMAGE_DESCRIPTION="unbound - a validating, recursive, and caching DNS resolver" \
     IMAGE_URL=c2dalark/unbound \
     IMAGE_REPO=https://github.com/c2dalark/unbound-docker \
     IMAGE_AUTHOR="Christopher Clark <c2dalark@users.noreply.github.com>"
 
 LABEL maintainer=${IMAGE_AUTHOR} \
-      org.opencontainers.image.created=${CREATE_TIME} \
       org.opencontainers.image.authors=${IMAGE_AUTHOR} \
       org.opencontainers.image.url=${IMAGE_REPO} \
       org.opencontainers.image.documentation=${IMAGE_REPO} \
