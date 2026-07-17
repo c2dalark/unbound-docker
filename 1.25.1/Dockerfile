@@ -2,6 +2,7 @@ FROM debian:trixie AS base
 RUN apt-get update && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
+LABEL maintainer="Chris Clark"
 WORKDIR /tmp/src
 
 FROM base AS openssl
@@ -57,9 +58,10 @@ RUN set -e -x && \
     rm -rf \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/*
+        /var/lib/apt/lists/* && \
+    apt-get clean
 
-FROM base AS unbound
+FROM base AS unbound_build
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
@@ -86,9 +88,8 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
     rm -f unbound.tar.gz && \
     cd unbound-1.25.1 && \
     groupadd _unbound && \
-    useradd -g _unbound -s /dev/null -d /etc _unbound && \
+    useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
     ./configure \
-        --disable-dependency-tracking \
         --prefix=/opt/unbound \
         --with-pthreads \
         --with-username=_unbound \
@@ -108,20 +109,19 @@ RUN build_deps="bison build-essential curl flex gcc libc-dev libevent-dev libexp
         /opt/unbound/share/man \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/*
+        /var/lib/apt/lists/* && \
+    apt-get clean
 
 
-FROM base AS app
-
-ARG NAME=unbound
+FROM base AS unbound
 
 ENV DEBIAN_FRONTEND=noninteractive \
+    NAME=unbound \
     UNBOUND_VERSION=1.25.1 \
-    NAME=${NAME} \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
     DESCRIPTION="${NAME} is a validating, recursive, and caching DNS resolver."
 
-COPY --from=unbound /opt /opt
+COPY --from=unbound_build /opt /opt
 
 RUN set -x && \
     apt-get update && apt-get install -y --no-install-recommends \
@@ -133,13 +133,14 @@ RUN set -x && \
       libexpat1 \
       libprotobuf-c1 && \
     groupadd _unbound && \
-    useradd -g _unbound -s /dev/null -d /etc _unbound && \
+    useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
     apt-get purge -y --auto-remove && \
     rm -rf \
         /opt/unbound/share/man \
         /tmp/* \
         /var/tmp/* \
-        /var/lib/apt/lists/*
+        /var/lib/apt/lists/* && \
+    apt-get clean
 
 COPY data/ /
 
