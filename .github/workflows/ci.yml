@@ -21,17 +21,17 @@ env:
   LATEST: 1.25.1
   BUILD_OS: "[ubuntu-latest,ubuntu-24.04-arm]"
   UNBOUND_BUILD: "[1.25.1,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]"
-  ARCH: "[amd64,arm64]"
+  ARCH: "[amd64,arm64,arm/v7]"
   TARGET_OS: "[linux]"
-  PLATFORMS: linux/amd64,linux/arm64
+  PLATFORMS: linux/amd64,linux/arm64,linux/armv7
 
 jobs:
   pre-build:
     strategy:
       matrix:
         build_os: [ubuntu-latest,ubuntu-24.04-arm]
-        unbound_build: [1.25.1,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
-        arch: [amd64,arm64]
+        unbound_build: [1.25.1] #,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
+        arch: [amd64,arm64,arm/v7]
         target_os: [linux]
         exclude:
           - build_os: ubuntu-latest
@@ -40,6 +40,7 @@ jobs:
             arch: arm/v7
           - build_os: ubuntu-24.04-arm
             arch: amd64
+          - arch: amd64
     runs-on: ${{ matrix.build_os }}
     permissions:
       contents: read
@@ -128,7 +129,7 @@ jobs:
     - pre-build
     strategy:
       matrix:
-        unbound_build: [1.25.1,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
+        unbound_build: [1.25.1] #,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
     permissions:
       contents: read
       packages: write
