@@ -25,24 +25,15 @@ env:
   TESTING_TAG: "testing"
   TARGET_OS: "[linux]"
   PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7
+  ARM_PLATFORMS: linux/arm64,linux/arm/v7
 
 jobs:
-  pre-build:
+  pre-build-arm:
     strategy:
       matrix:
-        build_os: [ubuntu-latest,ubuntu-24.04-arm]
         unbound_build: [1.25.1] #,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
-        arch: [amd64,arm64,arm/v7]
         target_os: [linux]
-        exclude:
-          - build_os: ubuntu-latest
-            arch: arm64
-          - build_os: ubuntu-latest
-            arch: arm/v7
-          - build_os: ubuntu-24.04-arm
-            arch: amd64
-          - arch: amd64
-    runs-on: ${{ matrix.build_os }}
+    runs-on: ubuntu-24.04-arm
     permissions:
       contents: read
       packages: write
@@ -97,31 +88,35 @@ jobs:
         with:
           context: ./${{ matrix.unbound_build }}/
           file: ./${{ matrix.unbound_build }}/Dockerfile.temp
-          load: true
-          outputs: type=docker,dest=${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}.tar
+          outputs: type=docker,dest=${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-.tar
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: ${{ matrix.target_os }}/${{ matrix.arch }}
+          platforms: ${{ env.ARM_PLATFORMS }}
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: |
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-min
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
             type=inline
             type=gha
           cache-to: |
             type=inline
             type=gha,mode=max
+            type=local,dest=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }},mode=max
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-min,mode=min
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
-          name: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}
-          path: ${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}.tar
+          name: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-tar
+          path: ${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+        with:
+          name: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-arm-buildcache
+          path: $${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm
 
   build-and-push:
     runs-on: ubuntu-latest
@@ -141,11 +136,17 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #v8.0.1
         with:
-          pattern: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}*
+          pattern: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}*-arm-buildcache
+          path: ${{ runner.temp }}/build-cache/
+
+      - name: Download artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #v8.0.1
+        with:
+          pattern: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}*tar
           path: ${{ runner.temp }}
 
-      - name: Load images
-        run: find ${{ runner.temp }} -iname c2dalark-unbound* -exec docker load --input {} \;
+#      - name: Load images
+#        run: find ${{ runner.temp }} -iname c2dalark-unbound* -exec docker load --input {} \;
 
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
