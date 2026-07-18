@@ -212,13 +212,13 @@ jobs:
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-amd64-min
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-arm64-min
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-armv7-min
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-$${{ env.PLATFORMS }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
             type=inline
             type=gha
           cache-to: |
             type=inline
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-$${{ env.PLATFORMS }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
