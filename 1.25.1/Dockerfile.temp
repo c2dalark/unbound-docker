@@ -1,7 +1,5 @@
-ARG BUILDPLATFORM
-FROM --platform=$BUILDPLATFORM debian:trixie AS build_base
+FROM debian:trixie AS base
 ARG TARGETPLATFORM
-ARG BUILDPLATFORM
 LABEL maintainer="Christopher Clark <c2dalark@users.noreply.github.com>"
 WORKDIR /tmp/src
 
@@ -9,7 +7,7 @@ RUN apt-get update && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-FROM --platform=$BUILDPLATFORM build_base AS openssl_build
+FROM base AS openssl_build
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
@@ -34,42 +32,16 @@ ENV DEBIAN_FRONTEND=noninteractive \
     # OpenSSL
     OPGP_OPENSSL_8=BA5473A2B0587B07FB27CF2D216094DFD0CB81EF
 
-RUN set -e -x && \
-    build_deps="build-essential ca-certificates curl dirmngr gnupg libidn2-0-dev libssl-dev" && \
-    apt-get update && apt-get install -y --no-install-recommends \
-      $build_deps && \
-    curl -L $SOURCE_OPENSSL$VERSION_OPENSSL.tar.gz -o openssl.tar.gz && \
-    echo "${SHA256_OPENSSL} ./openssl.tar.gz" | sha256sum -c - && \
-    curl -L $SOURCE_OPENSSL$VERSION_OPENSSL.tar.gz.asc -o openssl.tar.gz.asc && \
-    GNUPGHOME="$(mktemp -d)" && \
-    export GNUPGHOME && \
-    gpg --no-tty --keyserver keyserver.ubuntu.com --recv-keys "$OPGP_OPENSSL_1" "$OPGP_OPENSSL_2" "$OPGP_OPENSSL_3" "$OPGP_OPENSSL_4" "$OPGP_OPENSSL_5" "$OPGP_OPENSSL_6" "$OPGP_OPENSSL_7" "$OPGP_OPENSSL_8" && \
-    gpg --batch --verify openssl.tar.gz.asc openssl.tar.gz && \
-    tar xzf openssl.tar.gz && \
-    cd $VERSION_OPENSSL && \
-    ./config \
-      --prefix=/opt/openssl \
-      --openssldir=/opt/openssl \
-      no-weak-ssl-ciphers \
-      no-ssl3 \
-      no-shared \
-      enable-ec_nistp_64_gcc_128 \
-      -DOPENSSL_NO_HEARTBEATS \
-      -fstack-protector-strong && \
-    make depend && \
-    nproc | xargs -I % make -j% && \
-    make install_sw && \
-    apt-get purge -y --auto-remove \
-      $build_deps && \
-    rm -rf \
+COPY ./files/build_openssl.sh .
+RUN ./build_openssl.sh
+RUN rm -rf \
         /tmp/* \
         /var/tmp/* \
         /var/lib/apt/lists/* && \
     apt-get clean
 
-FROM --platform=$BUILDPLATFORM build_base AS unbound_build
+FROM base AS unbound_build
 ARG TARGETPLATFORM
-ARG BUILDPLATFORM
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NAME=unbound \
@@ -79,8 +51,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 COPY --from=openssl_build /opt/openssl /opt/openssl
 
-COPY ./files/test.sh .
-RUN ./test.sh
 COPY ./files/build_unbound.sh .
 RUN ./build_unbound.sh
 RUN rm -rf \
@@ -91,7 +61,7 @@ RUN rm -rf \
     apt-get clean
 
 
-FROM debian:trixie AS unbound
+FROM base AS unbound
 ARG NAME=unbound
 ARG TARGETPLATFORM
 ENV NAME="${NAME}" \
