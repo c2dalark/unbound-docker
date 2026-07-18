@@ -16,7 +16,7 @@ on:
 env:
   REGISTRY: docker.io
   IMAGE: c2dalark/unbound
-  CACHE: c2dalark/unbound-buildcache
+  CACHE_REPO: c2dalark/unbound-buildcache
   IMAGE-HYPHEN: c2dalark-unbound
   LATEST: 1.25.1
   BUILD_OS: "[ubuntu-latest,ubuntu-24.04-arm]"
@@ -101,15 +101,15 @@ jobs:
           platforms: ${{ matrix.target_os }}/${{ matrix.arch }}
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: |
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}
             type=inline
             type=gha
           cache-to: |
             type=inline
             type=gha,mode=max
             type=local,dest=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }},mode=max
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }},mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }},mode=max
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
@@ -220,11 +220,11 @@ jobs:
             type=inline
             type=gha,mode=max
             type=local,src=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}
           cache-to: |
             type=inline
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
