@@ -112,7 +112,9 @@ jobs:
           context: ./${{ matrix.unbound_build }}/
           file: ./${{ matrix.unbound_build }}/Dockerfile.temp
           load: true
-          outputs: type=docker,name=${{ env.IMAGE }},dest=${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}.tar
+          outputs: |
+            type=docker,name=${{ env.IMAGE }}
+            type=docker,name=${{ env.IMAGE }},dest=${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}.tar
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.target_os }}/${{ matrix.arch }}
