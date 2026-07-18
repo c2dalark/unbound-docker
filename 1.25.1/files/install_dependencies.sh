@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 set -x -e
 
 if [ $TARGETPLATFORM == "linux/amd64" ] || [ $TARGETPLATFORM == "linux/arm64"  ]; then
