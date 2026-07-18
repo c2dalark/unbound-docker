@@ -131,6 +131,11 @@ jobs:
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
+      - name: Load image
+        id: load-image
+        run: |
+          docker load --input ${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}.tar
+
       - name: Test build
         id: test-image
         run: |
