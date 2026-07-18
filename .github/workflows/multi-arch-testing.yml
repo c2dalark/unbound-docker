@@ -103,7 +103,6 @@ jobs:
           cache-from: |
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}
-            type=inline
             type=gha
           cache-to: |
             type=inline
@@ -217,11 +216,12 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: |
-            type=inline
             type=gha,mode=max
-            type=local,src=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}
+            type=local,src=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-linux-arm64
+            type=local,src=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-linux-armv7
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-linux-arm64
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-linux-armv7
           cache-to: |
             type=inline
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}
