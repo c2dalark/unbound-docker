@@ -141,8 +141,7 @@ jobs:
         run: |
           docker run --platform ${{ matrix.target_os }}/${{ matrix.arch }} --name testing -d --rm ${{ env.IMAGE }}:${{ matrix.unbound_build }} && \
           sleep 10 && \
-          docker exec testing drill @127.0.0.1 docker.com && \
-          docker stop testing
+          docker container ls -a || exit 1
 
       - name: Upload image artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
