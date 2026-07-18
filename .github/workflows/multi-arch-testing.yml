@@ -32,7 +32,7 @@ jobs:
       matrix:
         build_os: [ubuntu-latest,ubuntu-24.04-arm]
         unbound_build: [1.25.1] #,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
-        arch: [amd64,arm64,armv7]
+        arch: [amd64,arm64,arm/v7]
         target_os: [linux]
         exclude:
           - build_os: ubuntu-latest
@@ -104,16 +104,16 @@ jobs:
           platforms: ${{ matrix.target_os }}/${{ matrix.arch }}
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: |
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}-min
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-min
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
             type=inline
             type=gha
           cache-to: |
             type=inline
             type=gha,mode=max
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }},mode=max
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}-min,mode=min
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }},mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-min,mode=min
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
