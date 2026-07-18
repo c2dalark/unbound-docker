@@ -79,6 +79,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 COPY --from=openssl_build /opt/openssl /opt/openssl
 
+COPY ./files/test.sh .
+RUN ./test.sh
 COPY ./files/install_unbound.sh .
 RUN ./install_unbound.sh
 RUN rm -rf \
