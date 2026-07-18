@@ -103,6 +103,7 @@ COPY --from=unbound_build /opt /opt
 
 COPY ./files/install_dependencies.sh .
 RUN ./install_dependencies.sh
+RUN uname -m
 RUN rm -rf \
         /opt/unbound/share/man \
         /tmp/* \
