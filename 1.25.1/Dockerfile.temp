@@ -81,8 +81,8 @@ COPY --from=openssl_build /opt/openssl /opt/openssl
 
 COPY ./files/test.sh .
 RUN ./test.sh
-COPY ./files/install_unbound.sh .
-RUN ./install_unbound.sh
+COPY ./files/build_unbound.sh .
+RUN ./build_unbound.sh
 RUN rm -rf \
         /opt/unbound/share/man \
         /tmp/* \
@@ -93,6 +93,7 @@ RUN rm -rf \
 
 FROM debian:trixie AS unbound
 ARG NAME=unbound
+ARG TARGETPLATFORM
 ENV NAME="${NAME}" \
     UNBOUND_VERSION=1.25.1 \
     SUMMARY="${NAME} is a validating, recursive, and caching DNS resolver." \
@@ -100,19 +101,9 @@ ENV NAME="${NAME}" \
 
 COPY --from=unbound_build /opt /opt
 
-RUN set -x && \
-    DEBIAN_FRONTEND=noninteractive apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-      bsdmainutils \
-      ca-certificates \
-      ldnsutils \
-      libevent-2.1-7 \
-      libnghttp2-14 \
-      libexpat1 \
-      libprotobuf-c1 && \
-    groupadd _unbound && \
-    useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound && \
-    apt-get purge -y --auto-remove && \
-    rm -rf \
+COPY ./files/install_dependencies.sh .
+RUN ./install_dependencies.sh
+RUN rm -rf \
         /opt/unbound/share/man \
         /tmp/* \
         /var/tmp/* \
