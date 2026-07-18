@@ -1,5 +1,5 @@
 FROM debian:bullseye AS openssl
-LABEL maintainer="Chris Clark"
+LABEL maintainer="Christopher Clark <c2dalark@users.noreply.github.com>"
 
 ENV VERSION_OPENSSL=openssl-3.0.7 \
     SHA256_OPENSSL=83049d042a260e696f62406ac5c08bf706fd84383f945cf21bd61e9ed95c396e \
@@ -41,7 +41,7 @@ RUN set -e -x && \
         /var/lib/apt/lists/*
 
 FROM debian:bullseye AS unbound
-LABEL maintainer="Chris Clark"
+LABEL maintainer="Christopher Clark <c2dalark@users.noreply.github.com>"
 
 ENV NAME=unbound \
     UNBOUND_VERSION=1.16.1 \
@@ -95,7 +95,7 @@ RUN build_deps="curl gcc libc-dev libevent-dev libexpat1-dev libnghttp2-dev make
 
 
 FROM debian:bullseye
-LABEL maintainer="Chris Clark"
+LABEL maintainer="Christopher Clark <c2dalark@users.noreply.github.com>"
 
 ENV NAME=unbound \
     VERSION=1.0 \
