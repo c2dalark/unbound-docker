@@ -98,7 +98,8 @@ jobs:
           images: |
             ${{ env.IMAGE }}
           tags: |
-            type=raw,${{ env.TESTING_TAG }}
+            type=raw,${{ matrix.unbound_build }}
+            type=raw,v${{ matrix.unbound_build }}
             type=raw,value=latest,enable=false
 
       # Build and push Docker image with Buildx (don't push on PR)
@@ -126,6 +127,14 @@ jobs:
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }},mode=max
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+
+      - name: Test build
+        id: test-image
+        run: |
+          docker run --platform ${{ matrix.target_os }}/${{ matrix.arch }} --name testing -d --rm ${{ env.IMAGE }}:${{ matrix.unbound_build }} && \
+          sleep 10 && \
+          docker exec testing drill @127.0.0.1 docker.com && \
+          docker stop testing
 
       - name: Upload image artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
