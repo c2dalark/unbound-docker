@@ -21,11 +21,10 @@ env:
   LATEST: 1.25.1
   BUILD_OS: "[ubuntu-latest,ubuntu-24.04-arm]"
   UNBOUND_BUILD: "[1.25.1,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]"
-  ARCH: "[amd64,arm64,armv7]"
   TESTING_TAG: "testing"
   TARGET_OS: "[linux]"
-  PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7
-  ARM_PLATFORMS: linux/arm64,linux/arm/v7
+  PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7 #,linux/arm/v5,linux/i386
+  ARM_PLATFORMS: linux/arm64,linux/arm/v7 #,linux/arm/v5
 
 jobs:
   pre-build-arm:
@@ -146,10 +145,10 @@ jobs:
           path: ${{ runner.temp }}
 
       - name: Load images arm/v7
-        run: find ${{ runner.temp }} -iname c2dalark-unbound*tar -exec docker load --input {} --platform=linux/arm/v7\;
+        run: find ${{ runner.temp }} -iname c2dalark-unbound*tar -exec docker load --input {} --platform=linux/arm/v7 \;
 
       - name: Load images arm/64
-        run: find ${{ runner.temp }} -iname c2dalark-unbound*tar -exec docker load --input {} --platform=linux/arm64\;
+        run: find ${{ runner.temp }} -iname c2dalark-unbound*tar -exec docker load --input {} --platform=linux/arm64 \;
 
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
