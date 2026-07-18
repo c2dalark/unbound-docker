@@ -129,7 +129,8 @@ jobs:
             type=local,dest=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }},mode=max
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }},mode=max
         env:
-          SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+          #SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+          SOURCE_DATE_EPOCH: 0
 
       - name: Upload image artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
@@ -183,9 +184,8 @@ jobs:
 
       - name: List files in build-cache directory
         run: |
-          ls ${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-linux-arm64/ && \
-          ls ${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-linux-amd64/ && \
-          ls ${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-linux-armv7/
+          ls ${{ runner.temp }}/build-cache/ && \
+          find ${{ runner.temp }}/build-cache/
 
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
@@ -260,7 +260,8 @@ jobs:
             type=inline
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}
         env:
-          SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+          #SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+          SOURCE_DATE_EPOCH: 0
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
