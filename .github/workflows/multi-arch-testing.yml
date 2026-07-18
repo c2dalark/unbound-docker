@@ -1,4 +1,4 @@
-name: ci
+name: multi-arch-testing
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
@@ -6,32 +6,35 @@ name: ci
 # documentation.
 
 on:
-  schedule:
-    - cron: '26 16 * * *'
-  push:
-    branches: [ "main" ]
-#  pull_request:
+#  schedule:
+#    - cron: '26 16 * * *'
+#  push:
 #    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 env:
   REGISTRY: docker.io
   IMAGE: c2dalark/unbound
-  CACHE: c2dalark/unbound-buildcache
+  CACHE_REPO: c2dalark/unbound-buildcache
   IMAGE-HYPHEN: c2dalark-unbound
   LATEST: 1.25.1
   BUILD_OS: "[ubuntu-latest,ubuntu-24.04-arm]"
-  UNBOUND_BUILD: "[1.25.1,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]"
-  ARCH: "[amd64,arm64,arm/v7]"
+  UNBOUND_BUILD: "[1.19.0,1.19.1,1.19.2,1.19.3,1.20.0,1.21.0,1.21.1,1.22.0,1.23.0,1.23.1,1.24.0,1.24.1,1.24.2,1.25.0,1.25.1]"
+  TESTING_TAG: "testing"
   TARGET_OS: "[linux]"
-  PLATFORMS: linux/amd64,linux/arm64,linux/armv7
+  PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7 #,linux/arm/v5,linux/i386
+  ARM_PLATFORMS: linux/arm64,linux/arm/v7 #,linux/arm/v5
 
 jobs:
   pre-build:
     strategy:
       matrix:
         build_os: [ubuntu-latest,ubuntu-24.04-arm]
-        unbound_build: [1.25.1] #,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
+        unbound_build: [1.25.1]
+        #unbound_build: [1.19.0,1.19.1,1.19.2,1.19.3,1.20.0,1.21.0,1.21.1,1.22.0,1.23.0,1.23.1,1.24.0,1.24.1,1.24.2,1.25.0,1.25.1]
         arch: [amd64,arm64,arm/v7]
+        arch-hyphen: [amd64,arm64,armv7]
         target_os: [linux]
         exclude:
           - build_os: ubuntu-latest
@@ -40,6 +43,18 @@ jobs:
             arch: arm/v7
           - build_os: ubuntu-24.04-arm
             arch: amd64
+          - arch: arm64
+            arch-hyphen: armv7
+          - arch: arm64
+            arch-hyphen: amd64
+          - arch: arm/v7
+            arch-hyphen: arm64
+          - arch: arm/v7
+            arch-hyphen: amd64
+          - arch: amd64
+            arch-hyphen: arm64
+          - arch: amd64
+            arch-hyphen: armv7
     runs-on: ${{ matrix.build_os }}
     permissions:
       contents: read
@@ -91,42 +106,53 @@ jobs:
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build Docker image
-        id: build-and-push
+        id: pre-build
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: ./${{ matrix.unbound_build }}/
-          file: ./${{ matrix.unbound_build }}/Dockerfile
+          file: ./${{ matrix.unbound_build }}/Dockerfile.temp
           load: true
-          outputs: type=docker,dest=${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}.tar
+          outputs: |
+            type=docker,name=${{ env.IMAGE }}
+            type=docker,name=${{ env.IMAGE }},dest=${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}.tar
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.target_os }}/${{ matrix.arch }}
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: |
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
-            type=inline
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}
             type=gha
           cache-to: |
             type=inline
             type=gha,mode=max
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }},mode=max
+            type=local,dest=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }},mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }},mode=max
         env:
-          SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+          #SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+          SOURCE_DATE_EPOCH: 0
 
-      - name: Upload artifact
+      - name: Upload image artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
-          name: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}
-          path: ${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch }}.tar
+          name: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}.tar
+          path: ${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}.tar
 
-  build-and-push:
+      - name: Upload build-cache artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+        with:
+          name: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.arch-hyphen }}-buildcache
+          path: ${{ runner.temp }}/build-cache/*
+
+  build-package-push:
     runs-on: ubuntu-latest
     needs:
     - pre-build
     strategy:
       matrix:
-        unbound_build: [1.25.1] #,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
+        unbound_build: [1.25.1]
+        #unbound_build: [1.19.0,1.19.1,1.19.2,1.19.3,1.20.0,1.21.0,1.21.1,1.22.0,1.23.0,1.23.1,1.24.0,1.24.1,1.24.2,1.25.0,1.25.1]
+      max-parallel: 1
     permissions:
       contents: read
       packages: write
@@ -135,14 +161,31 @@ jobs:
       id-token: write
 
     steps:
-      - name: Download artifacts
+      - name: Download build-cache artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #v8.0.1
         with:
-          pattern: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}*
+          pattern: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}*buildcache*
+          path: ${{ runner.temp }}/build-cache/
+
+      - name: Download image artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #v8.0.1
+        with:
+          pattern: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-linux-*tar*
           path: ${{ runner.temp }}
 
-      - name: Load images
-        run: find ${{ runner.temp }} -iname c2dalark-unbound* -exec docker load --input {} \;
+      - name: Load images arm/v7
+        run: find ${{ runner.temp }} -iname c2dalark-unbound*tar -exec docker load --input {} --platform=linux/arm/v7 \;
+
+      - name: Load images arm/64
+        run: find ${{ runner.temp }} -iname c2dalark-unbound*tar -exec docker load --input {} --platform=linux/arm64 \;
+
+      - name: Load images amd64
+        run: find ${{ runner.temp }} -iname c2dalark-unbound*tar -exec docker load --input {} --platform=linux/amd64 \;
+
+      - name: List files in build-cache directory
+        run: |
+          ls ${{ runner.temp }}/build-cache/ && \
+          find ${{ runner.temp }}/build-cache/
 
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
@@ -198,24 +241,27 @@ jobs:
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: ./${{ matrix.unbound_build }}/
-          file: ./${{ matrix.unbound_build }}/Dockerfile
+          file: ./${{ matrix.unbound_build }}/Dockerfile.temp
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ env.PLATFORMS }}
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: |
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-amd64
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-arm64
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-amd64-min
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-arm64-min
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
-            type=inline
-            type=gha
+            type=gha,mode=max
+            type=local,src=${{ runner.temp }}/build-cache/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-arm64-buildcache
+            type=local,src=${{ runner.temp }}/build-cache/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-armv7-buildcache
+            type=local,src=${{ runner.temp }}/build-cache/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-amd64-buildcache
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-linux-arm64
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-linux-armv7
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-linux-amd64
           cache-to: |
             type=inline
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}
         env:
-          SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+          #SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+          SOURCE_DATE_EPOCH: 0
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
