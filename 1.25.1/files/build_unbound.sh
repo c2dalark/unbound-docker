@@ -21,7 +21,7 @@ useradd -g _unbound -s /usr/sbin/nologin -d /opt/unbound _unbound
 if [ $TARGETPLATFORM == "linux/amd64" ]; then
     config_flags="--host=x86_64-pc-linux-gnu "
 elif [ $TARGETPLATFORM == "linux/arm64"  ]; then
-    config_flags="--host=armv7l-pc-linux-gnu "
+    config_flags="--host=armv64-pc-linux-gnu "
 elif [ $TARGETPLATFORM == "linux/arm/v7" ]; then
     config_flags="--host=armv7l-pc-linux-gnu "
 else
