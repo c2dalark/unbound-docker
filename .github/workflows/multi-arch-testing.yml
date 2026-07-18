@@ -89,12 +89,13 @@ jobs:
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build Docker image
-        id: build-and-push
+        id: build-arm
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: ./${{ matrix.unbound_build }}/
           file: ./${{ matrix.unbound_build }}/Dockerfile.temp
-          outputs: type=docker,dest=${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}.tar
+          load: true
+          outputs: type=docker,name=${{ env.IMAGE }},dest=${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}.tar
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.target_os }}/${{ matrix.arch }}
@@ -124,7 +125,7 @@ jobs:
           name: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.arch-hyphen }}-buildcache
           path: ${{ runner.temp }}/build-cache/*
 
-  build-and-push:
+  build-package-push:
     runs-on: ubuntu-latest
     needs:
     - pre-build-arm
