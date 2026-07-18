@@ -40,7 +40,6 @@ jobs:
             arch: arm/v7
           - build_os: ubuntu-24.04-arm
             arch: amd64
-          - arch: amd64
     runs-on: ${{ matrix.build_os }}
     permissions:
       contents: read
