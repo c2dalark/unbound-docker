@@ -249,9 +249,9 @@ jobs:
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: |
             type=gha,mode=max
-            type=local,src=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-linux-arm64/
-            type=local,src=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-linux-armv7/
-            type=local,src=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-linux-amd64/
+            type=local,src=${{ runner.temp }}/build-cache/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-arm64-buildcache
+            type=local,src=${{ runner.temp }}/build-cache/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-armv7-buildcache
+            type=local,src=${{ runner.temp }}/build-cache/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-amd64-buildcache
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-linux-arm64
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_REPO }}:${{ matrix.unbound_build }}-linux-armv7
