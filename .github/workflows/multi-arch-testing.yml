@@ -88,7 +88,7 @@ jobs:
         with:
           context: ./${{ matrix.unbound_build }}/
           file: ./${{ matrix.unbound_build }}/Dockerfile.temp
-          outputs: type=docker,dest=${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-.tar
+          outputs: type=oci,dest=${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-.tar
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ env.ARM_PLATFORMS }}
@@ -101,7 +101,7 @@ jobs:
           cache-to: |
             type=inline
             type=gha,mode=max
-            type=local,dest=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm
+            type=local,src=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm,mode=max
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }},mode=max
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
@@ -145,8 +145,11 @@ jobs:
           pattern: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}*tar
           path: ${{ runner.temp }}
 
-#      - name: Load images
-#        run: find ${{ runner.temp }} -iname c2dalark-unbound* -exec docker load --input {} \;
+      - name: Load images arm/v7
+        run: find ${{ runner.temp }} -iname c2dalark-unbound*tar -exec docker load --input {} --platform=linux/arm/v7\;
+
+      - name: Load images arm/64
+        run: find ${{ runner.temp }} -iname c2dalark-unbound*tar -exec docker load --input {} --platform=linux/arm64\;
 
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
@@ -207,16 +210,10 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: |
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-amd64
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-arm64
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-armv7
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-amd64-min
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-arm64-min
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-linux-armv7-min
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
             type=inline
-            type=gha
+            type=gha,mode=max
+            type=local,dest=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}
           cache-to: |
             type=inline
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}
