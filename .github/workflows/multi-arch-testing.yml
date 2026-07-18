@@ -31,7 +31,14 @@ jobs:
     strategy:
       matrix:
         unbound_build: [1.25.1] #,1.25.0,1.24.2,1.24.1,1.24.0,1.23.1,1.23.0,1.22.0,1.21.1,1.21.0,1.20.0,1.19.3,1.19.2,1.19.1,1.19.0]
+        arch: [arm64,arm/v7]
+        arch-hyphen: [arm64,armv7]
         target_os: [linux]
+        exclude:
+          - arch: arm64
+            arch-hyphen: armv7
+          - arch: arm/v7
+            arch-hyphen: arm64
     runs-on: ubuntu-24.04-arm
     permissions:
       contents: read
@@ -86,36 +93,36 @@ jobs:
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: ./${{ matrix.unbound_build }}/
-          file: ./${{ matrix.unbound_build }}/Dockerfile.temp
-          outputs: type=oci,dest=${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-.tar
+          file: ./${{ matrix.unbound_build }}/Dockerfile
+          outputs: type=docker,dest=${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}.tar
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: ${{ env.ARM_PLATFORMS }}
+          platforms: ${{ matrix.target_os }}/${{ matrix.arch }}
           annotations: ${{ steps.meta.outputs.annotations }}
           cache-from: |
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}
             type=inline
             type=gha
           cache-to: |
             type=inline
             type=gha,mode=max
-            type=local,dest=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm,mode=max
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }},mode=max
+            type=local,dest=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }},mode=max
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }},mode=max
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
-          name: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-tar
-          path: ${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-.tar
+          name: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}
+          path: ${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}.tar
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
-          name: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-arm-buildcache
-          path: $${{ runner.temp }}/build-cache/
+          name: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.arch-hyphen }}-buildcache
+          path: $${{ runner.temp }}/build-cache/*
 
   build-and-push:
     runs-on: ubuntu-latest
@@ -135,7 +142,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #v8.0.1
         with:
-          pattern: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}*-arm-buildcache
+          pattern: ${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}*buildcache*
           path: ${{ runner.temp }}/build-cache/
 
       - name: Download artifacts
@@ -213,6 +220,7 @@ jobs:
             type=gha,mode=max
             type=local,src=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}
           cache-to: |
             type=inline
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}
