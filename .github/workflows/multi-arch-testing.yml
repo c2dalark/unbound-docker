@@ -101,7 +101,7 @@ jobs:
           cache-to: |
             type=inline
             type=gha,mode=max
-            type=local,src=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm,mode=max
+            type=local,dest=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm,mode=max
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }},mode=max
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
@@ -212,7 +212,7 @@ jobs:
           cache-from: |
             type=inline
             type=gha,mode=max
-            type=local,dest=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm
+            type=local,src=${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-${{ matrix.target_os }}-arm
             type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE }}:${{ matrix.unbound_build }}-${{ matrix.target_os }}
           cache-to: |
             type=inline
