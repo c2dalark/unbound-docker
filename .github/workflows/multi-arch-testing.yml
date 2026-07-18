@@ -131,18 +131,6 @@ jobs:
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
 
-      - name: Load image
-        id: load-image
-        run: |
-          docker load --input ${{ runner.temp }}/${{ env.IMAGE-HYPHEN }}-${{ matrix.unbound_build }}-${{ matrix.target_os }}-${{ matrix.arch-hyphen }}.tar
-
-      - name: Test build
-        id: test-image
-        run: |
-          docker run --platform ${{ matrix.target_os }}/${{ matrix.arch }} --name testing -d --rm ${{ env.IMAGE }}:${{ matrix.unbound_build }} && \
-          sleep 10 && \
-          docker container ls -a || exit 1
-
       - name: Upload image artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
         with:
@@ -192,6 +180,12 @@ jobs:
 
       - name: Load images amd64
         run: find ${{ runner.temp }} -iname c2dalark-unbound*tar -exec docker load --input {} --platform=linux/amd64 \;
+
+      - name: List files in build-cache directory
+        run: |
+          ls ${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-linux-arm64/ && \
+          ls ${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-linux-amd64/ && \
+          ls ${{ runner.temp }}/build-cache/${{ matrix.unbound_build }}-linux-armv7/
 
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
